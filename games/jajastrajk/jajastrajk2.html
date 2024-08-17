@@ -1,0 +1,317 @@
+<html><head><title>Jaja strajk 2</title>
+    <style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        cursor: default;
+    }
+    #game-container {
+        width: 100%;
+        height: 100%;
+        background-color: #2c3e50;
+        position: relative;
+    }
+    #player {
+        width: 50px;
+        height: 50px;
+        background-color: #3498db;
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 50%;
+    }
+    .zombie {
+        width: 40px;
+        height: 40px;
+        background-color: #27ae60;
+        position: absolute;
+        border-radius: 50%;
+    }
+    .bullet {
+        width: 10px;
+        height: 10px;
+        background-color: #e74c3c;
+        position: absolute;
+        border-radius: 50%;
+    }
+    .target {
+        width: 30px;
+        height: 30px;
+        background-color: #e74c3c;
+        position: absolute;
+        border-radius: 50%;
+    }
+    #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        font-size: 24px;
+    }
+    #timer {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: white;
+        font-size: 24px;
+    }
+    #menu {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        color: white;
+        display: none;
+    }
+    #menu h1 {
+        font-size: 36px;
+        margin-bottom: 20px;
+    }
+    #latest-score {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    .menu-button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 18px;
+        margin: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .menu-button:hover {
+        background-color: #2980b9;
+    }
+    #game-over-reason {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #e74c3c;
+    }
+    </style>
+    </head>
+    <body>
+    <div id="game-container">
+        <div id="player"></div>
+        <div id="score">Punkty: <span id="score-value">0</span></div>
+        <div id="timer">Czas: <span id="time-value">40</span></div>
+        <div id="menu">
+            <h1>Jaja strajk 2</h1>
+            <div id="game-over-reason"></div>
+            <div id="latest-score">Ostatni Wynik: 0</div>
+            <button id="play-button" class="menu-button">Graj</button>
+            <button id="quit-button" class="menu-button">Opuść</button>
+        </div>
+    </div>
+    
+    <script>
+    const player = document.getElementById('player');
+    const gameContainer = document.getElementById('game-container');
+    const scoreValue = document.getElementById('score-value');
+    const timeValue = document.getElementById('time-value');
+    const menu = document.getElementById('menu');
+    const latestScore = document.getElementById('latest-score');
+    const playButton = document.getElementById('play-button');
+    const quitButton = document.getElementById('quit-button');
+    const gameOverReason = document.getElementById('game-over-reason');
+    
+    let score = 0;
+    let gameActive = false;
+    let timeLeft = 40;
+    let zombieInterval, targetInterval, timerInterval;
+    
+    function startGame() {
+        score = 0;
+        timeLeft = 40;
+        gameActive = true;
+        menu.style.display = 'none';
+        scoreValue.textContent = '0';
+        timeValue.textContent = '40';
+        gameOverReason.textContent = '';
+        
+        // Remove any existing zombies, targets, and bullets
+        clearGameObjects();
+        
+        zombieInterval = setInterval(createZombie, 1000);
+        targetInterval = setInterval(createTarget, 2000);
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+    
+    function clearGameObjects() {
+        const zombies = document.querySelectorAll('.zombie');
+        const targets = document.querySelectorAll('.target');
+        const bullets = document.querySelectorAll('.bullet');
+        
+        zombies.forEach(zombie => zombie.remove());
+        targets.forEach(target => target.remove());
+        bullets.forEach(bullet => bullet.remove());
+    }
+    
+    function movePlayer(e) {
+        if (!gameActive) return;
+        const x = e.clientX;
+        const offset = 26;
+        player.style.left = `${x - offset}px`;
+    }
+    
+    function createZombie() {
+        if (!gameActive) return;
+        const zombie = document.createElement('div');
+        zombie.classList.add('zombie');
+        zombie.style.left = `${Math.random() * (gameContainer.offsetWidth - 40)}px`;
+        zombie.style.top = '0px';
+        gameContainer.appendChild(zombie);
+    
+        const moveZombie = setInterval(() => {
+            if (!gameActive) {
+                clearInterval(moveZombie);
+                return;
+            }
+            const top = parseInt(zombie.style.top);
+            zombie.style.top = `${top + 2}px`;
+    
+            if (top > gameContainer.offsetHeight) {
+                clearInterval(moveZombie);
+                if (zombie.parentNode === gameContainer) {
+                    gameContainer.removeChild(zombie);
+                }
+            }
+        }, 50);
+    }
+    
+    function createTarget() {
+        if (!gameActive) return;
+        const target = document.createElement('div');
+        target.classList.add('target');
+        target.style.left = `${Math.random() * (gameContainer.offsetWidth - 30)}px`;
+        target.style.top = '0px';
+        gameContainer.appendChild(target);
+    
+        const moveTarget = setInterval(() => {
+            if (!gameActive) {
+                clearInterval(moveTarget);
+                return;
+            }
+            const top = parseInt(target.style.top);
+            target.style.top = `${top + 1}px`;
+    
+            if (top > gameContainer.offsetHeight) {
+                clearInterval(moveTarget);
+                if (target.parentNode === gameContainer) {
+                    gameContainer.removeChild(target);
+                }
+            }
+        }, 50);
+    }
+    
+    function shoot(e) {
+        if (!gameActive) return;
+        const bullet = document.createElement('div');
+        bullet.classList.add('bullet');
+        bullet.style.left = `${player.offsetLeft + 20}px`;
+        bullet.style.bottom = '70px';
+        gameContainer.appendChild(bullet);
+    
+        const moveBullet = setInterval(() => {
+            if (!gameActive) {
+                clearInterval(moveBullet);
+                return;
+            }
+            const bottom = parseInt(bullet.style.bottom);
+            bullet.style.bottom = `${bottom + 20}px`;
+    
+            const zombies = document.querySelectorAll('.zombie');
+            zombies.forEach(zombie => {
+                if (isColliding(bullet, zombie)) {
+                    clearInterval(moveBullet);
+                    if (bullet.parentNode === gameContainer) {
+                        gameContainer.removeChild(bullet);
+                    }
+                    if (zombie.parentNode === gameContainer) {
+                        gameContainer.removeChild(zombie);
+                    }
+                    score++;
+                    scoreValue.textContent = score;
+                }
+            });
+    
+            const targets = document.querySelectorAll('.target');
+            targets.forEach(target => {
+                if (isColliding(bullet, target)) {
+                    clearInterval(moveBullet);
+                    if (bullet.parentNode === gameContainer) {
+                        gameContainer.removeChild(bullet);
+                    }
+                    if (target.parentNode === gameContainer) {
+                        gameContainer.removeChild(target);
+                    }
+                    endGame("Uderzyłeś Czerwonego!");
+                }
+            });
+    
+            if (bottom > gameContainer.offsetHeight) {
+                clearInterval(moveBullet);
+                if (bullet.parentNode === gameContainer) {
+                    gameContainer.removeChild(bullet);
+                }
+            }
+        }, 10);
+    }
+    
+    function isColliding(a, b) {
+        const aRect = a.getBoundingClientRect();
+        const bRect = b.getBoundingClientRect();
+        return !(
+            aRect.top + aRect.height < bRect.top ||
+            aRect.top > bRect.top + bRect.height ||
+            aRect.left + aRect.width < bRect.left ||
+            aRect.left > bRect.left + bRect.width
+        );
+    }
+    
+    function endGame(reason = "") {
+        gameActive = false;
+        clearInterval(zombieInterval);
+        clearInterval(targetInterval);
+        clearInterval(timerInterval);
+        latestScore.textContent = `Ostatni Wynik: ${score}`;
+        gameOverReason.textContent = reason;
+        menu.style.display = 'block';
+        
+        // Clear all game objects when the game ends
+        clearGameObjects();
+    }
+    
+    function updateTimer() {
+        timeLeft--;
+        timeValue.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            endGame("Koniec Czasu!");
+        }
+    }
+    
+    function quitGame() {
+        window.location.href = "jajastrajkmenu.html";
+    }
+    
+    gameContainer.addEventListener('mousemove', movePlayer);
+    gameContainer.addEventListener('click', shoot);
+    playButton.addEventListener('click', startGame);
+    quitButton.addEventListener('click', quitGame);
+    
+    // Show menu on initial load
+    menu.style.display = 'block';
+    </script>
+    </body>
+    </html>

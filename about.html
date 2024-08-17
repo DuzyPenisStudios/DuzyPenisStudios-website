@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duży Penis Studios™ - O Nas</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+  
+    :root {
+      --primary-color: #6C63FF;
+      --secondary-color: #00D9A5;
+      --background-color: #1A1A2E;
+      --text-color: #F2F2F2;
+      --card-bg: rgba(255, 255, 255, 0.1);
+      --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+  
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+  
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+  
+    header {
+      background-color: rgba(26, 26, 46, 0.8);
+      backdrop-filter: blur(10px);
+      position: fixed;
+      width: 100%;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+  
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--primary-color);
+      text-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
+    }
+  
+    .nav-links {
+      display: flex;
+      list-style: none;
+    }
+  
+    .nav-links li {
+      margin-left: 30px;
+    }
+  
+    .nav-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      font-weight: 500;
+    }
+  
+    .nav-links a:hover {
+      color: var(--primary-color);
+    }
+  
+    .menu-toggle {
+      display: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: var(--text-color);
+    }
+  
+    .about-section {
+      padding: 120px 0 60px;
+    }
+  
+    .about-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+  
+    .about-text {
+      flex-basis: 60%;
+      padding-right: 40px;
+    }
+  
+    .about-image {
+      flex-basis: 40%;
+      position: relative;
+    }
+  
+    .about-image img {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: var(--box-shadow);
+    }
+  
+    .about-image::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: 20px;
+      bottom: 20px;
+      border: 2px solid var(--primary-color);
+      border-radius: 20px;
+      z-index: -1;
+    }
+  
+    h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      text-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
+    }
+  
+    p {
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+  
+    .values {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+  
+    .value-item {
+      flex-basis: 30%;
+      text-align: center;
+      padding: 20px;
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: var(--box-shadow);
+      transition: all 0.3s ease;
+    }
+  
+    .value-item:hover {
+      transform: translateY(-10px);
+    }
+  
+    .value-item i {
+      font-size: 48px;
+      color: var(--secondary-color);
+      margin-bottom: 20px;
+    }
+  
+    .value-item h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+  
+    .team-section {
+      padding: 60px 0;
+    }
+  
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+  
+    .team-member {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--box-shadow);
+      transition: all 0.3s ease;
+    }
+  
+    .team-member:hover {
+      transform: translateY(-10px);
+    }
+  
+    .team-member img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      object-fit: cover;
+      border: 3px solid var(--primary-color);
+    }
+  
+    .team-member h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: var(--secondary-color);
+    }
+  
+    .team-member p {
+      font-size: 16px;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+  
+    @media screen and (max-width: 768px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: rgba(26, 26, 46, 0.95);
+        padding: 20px;
+      }
+  
+      .nav-links.active {
+        display: flex;
+      }
+  
+      .nav-links li {
+        margin: 10px 0;
+      }
+  
+      .menu-toggle {
+        display: block;
+      }
+
+      .about-content {
+        flex-direction: column;
+      }
+  
+      .about-text, .about-image {
+        flex-basis: 100%;
+        padding-right: 0;
+        margin-bottom: 40px;
+      }
+  
+      .values {
+        flex-direction: column;
+      }
+  
+      .value-item {
+        margin-bottom: 20px;
+      }
+  
+      .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <div class="logo">Duży Penis Studios™</div>
+      <div class="menu-toggle" id="menuToggle">☰</div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Strona Główna</a></li>
+        <li><a href="#about">O Nas</a></li>
+        <li><a href="contact.html">Kontakt</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="about" class="about-section">
+      <div class="container">
+        <div class="about-content">
+          <div class="about-text">
+            <h2>O Duży Penis Studios™</h2>
+            <p>Witaj w świecie Duży Penis Studios™, gdzie innowacja spotyka się z kreatywnością, a granice cyfrowych doświadczeń są stale przesuwane. Założone w 2024 roku przez grupę pasjonatów gier i technologii, nasze studio szybko stało się liderem w tworzeniu gier z dużym penisem.</p>
+            <p>Nasza misja jest prosta: tworzyć gry, które nie tylko mają duże penisy, ale mają największe penisy. Wierzymy, że gry mają moc kształtowania rzeczywistości i wpływania na sposób, w jaki postrzegamy świat.</p>
+            <p>W Duży Penis Studios™ łączymy najnowocześniejsze technologie z artystyczną wizją, tworząc "unikalne" światy, w których gracze mogą się zanurzyć i odkrywać penisy. Od epickich przygód RPG po innowacyjne gry mobilne, każdy nasz projekt jest starannie dopracowany, aby dostarczyć niezapomniane wrażenia.</p>
+          </div>
+          <div class="about-image">
+            <img src="images\duzypenisstudios\duzypenisstudios-logo.jpg" alt="Duży Penis Studios" width="460" height="460">
+          </div>
+        </div>
+        
+        <div class="values">
+          <div class="value-item">
+            <i class="fas fa-lightbulb"></i>
+            <h3>Innowacja</h3>
+            <p>Nieustannie poszukujemy nowych sposobów na przesuwanie granic technologii i designu penisów.</p>
+          </div>
+          <div class="value-item">
+            <i class="fas fa-users"></i>
+            <h3>Współpraca</h3>
+            <p>Wierzymy w siłę współpracy i różnorodności, dzięki którym mamy największe penisy.</p>
+          </div>
+          <div class="value-item">
+            <i class="fas fa-heart"></i>
+            <h3>Pasja</h3>
+            <p>Nasza miłość do gier i penisów jest siłą napędową wszystkiego, co robimy.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="team-section">
+      <div class="container">
+        <h2>Poznaj Nasz Zespół</h2>
+        <div class="team-grid">
+          <div class="team-member">
+            <img src="images/team/kuzar77.png" alt="Kuzar77" width="300" height="300">
+            <h3>Kuzar77</h3>
+            <p>CEO &amp; Założyciel</p>
+            <p>Gej</p>
+          </div>
+          <div class="team-member">
+            <img src="images/team/retrix240.png" alt="Retrix240" width="300" height="300">
+            <h3>Retrix240</h3>
+            <p>CEO &amp; Założyciel</p>
+            <p>Gej</p>
+          </div>
+          <div class="team-member">
+            <img src="images/team/bixorr.png" alt="Bixorr" width="300" height="300">
+            <h3>Bixorr</h3>
+            <p>Główny programista &amp; deweloper 95% rzeczy</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+  <script>
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+
+    // Close mobile menu when a link is clicked
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+        navLinks.classList.remove('active');
+      }
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Add a subtle hover effect to team members
+    const teamMembers = document.querySelectorAll('.team-member');
+    teamMembers.forEach(member => {
+      member.addEventListener('mouseenter', () => {
+        member.style.transform = 'scale(1.05)';
+        member.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.3)';
+      });
+      member.addEventListener('mouseleave', () => {
+        member.style.transform = 'scale(1)';
+        member.style.boxShadow = 'var(--box-shadow)';
+      });
+    });
+
+    // Animate value items on scroll
+    const valueItems = document.querySelectorAll('.value-item');
+    const animateOnScroll = (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(animateOnScroll, {
+      root: null,
+      threshold: 0.1
+    });
+
+    valueItems.forEach(item => {
+      item.style.opacity = '0';
+      item.style.transform = 'translateY(20px)';
+      item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(item);
+    });
+  </script>
+</body>
+</html>

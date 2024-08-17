@@ -1,0 +1,537 @@
+<html>
+<head>
+<title>IdentityExplorer</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 10px;
+    color: #333;
+    font-size: 16px;
+  }
+  .container {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    position: relative;
+  }
+  h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+  }
+  form {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  input[type="text"] {
+    width: 60%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+  } 
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #2980b9;
+  }
+  #result, #additional-info {
+    background-color: #ecf0f1;
+    padding: 20px;
+    border-radius: 4px;
+    margin-top: 20px;
+  }
+  .info-item {
+    margin-bottom: 10px;
+  }
+  .info-label {
+    font-weight: bold;
+    color: #2c3e50;
+    display: inline-block;
+    width: 180px;
+  }
+  .disclaimer {
+    font-size: 12px;
+    color: #7f8c8d;
+    text-align: center;
+    margin-top: 20px;
+  }
+  #quitButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    font-size: 0.8em;
+    background-color: gray;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  #quitButton:hover {
+    background-color: #2980b9;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      padding: 30px;
+    }
+    h1, h2 {
+      font-size: 2em;
+    }
+    form {
+      flex-direction: row;
+      justify-content: center;
+    }
+    input[type="text"] {
+      width: 60%;
+      margin-bottom: 0;
+      border-radius: 4px 0 0 4px;
+    }
+    button {
+      width: auto;
+      border-radius: 0 4px 4px 0;
+    }
+    .info-label {
+      display: inline-block;
+      width: 180px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <button id="quitButton" onclick="window.location.href='identityexplorermenu.html'">Exit</button>
+    <h1>Identity Explorer</h1>
+    <form id="nameForm" method="GET" action="/generate">
+      <input type="text" id="fullName" name="fullName" placeholder="Wprowadź pełne imię i nazwisko" required>
+      <button type="submit">Wyszukaj Informacje</button>
+    </form>
+    <div id="result"></div>
+    <div id="additional-info"></div>
+    <p class="disclaimer">Zastrzeżenie: Wszystkie podane informacje są całkowicie prawdziwe.</p>
+  </div>
+
+  <script>
+    document.getElementById('nameForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const fullName = document.getElementById('fullName').value;
+      generateFakeInfo(fullName);
+    });
+
+    function generateFakeInfo(fullName) {
+      const result = document.getElementById('result');
+      const additionalInfo = document.getElementById('additional-info');
+
+      const nameParts = fullName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+
+      const occupation = generateRandomOccupation();
+      const address = generateRandomAddress();
+      const ipAddress = generateRandomIP();
+      const ssn = generateRandomSSN();
+      const creditCard = generateRandomCreditCard();
+      const phoneNumber = generateRandomPhoneNumber();
+      const emails = generateRandomEmails(firstName, lastName);
+      const birthdate = generateRandomDate(0, 2030);
+
+      result.innerHTML = `
+        <div class="info-item"><span class="info-label">Imię i nazwisko:</span> ${fullName}</div>
+        <div class="info-item"><span class="info-label">Data urodzenia:</span> ${birthdate}</div>
+        <div class="info-item"><span class="info-label">Zawód:</span> ${occupation}</div>
+        <div class="info-item"><span class="info-label">Adres:</span> ${address}</div>
+        <div class="info-item"><span class="info-label">Adres IP:</span> ${ipAddress}</div>
+        <div class="info-item"><span class="info-label">Numer SSN:</span> ${ssn}</div>
+        <div class="info-item"><span class="info-label">Karta kredytowa:</span> ${creditCard}</div>
+        <div class="info-item"><span class="info-label">Numer telefonu:</span> ${phoneNumber}</div>
+        <div class="info-item"><span class="info-label">Emaile:</span> ${emails.join(', ')}</div>
+      `;
+
+      additionalInfo.innerHTML = `
+        <h2>Dodatkowe informacje</h2>
+        <div class="info-item"><span class="info-label">Hobby:</span> ${generateRandomHobby()}</div>
+        <div class="info-item"><span class="info-label">Ciekawostka:</span> ${generateRandomFunFact()}</div>
+        <div class="info-item"><span class="info-label">Czego się boi:</span> ${generateRandomFear()}</div>
+        <div class="info-item"><span class="info-label">Ulubione jedzenie:</span> ${generateRandomFood()}</div>
+        <div class="info-item"><span class="info-label">Zwierzę domowe:</span> ${generateRandomPet()}</div>
+        <div class="info-item"><span class="info-label">Preferowany transport:</span> ${generateRandomTransport()}</div>
+        <div class="info-item"><span class="info-label">Ulubiona część ciała:</span> ${generateRandomBodyPart()}</div>
+        <div class="info-item"><span class="info-label">Wymarzone wakacje:</span> ${generateRandomVacation()}</div>
+        <div class="info-item"><span class="info-label">Ukryty talent:</span> ${generateRandomTalent()}</div>
+        <div class="info-item"><span class="info-label">Cytat:</span> "${generateRandomCatchphrase()}"</div>
+      `;
+    }
+
+    function generateRandomOccupation1() {
+      const occupations = ['Striptizerka', 'Żebracz spod mostu', 'Model PornHub', 'Jaj Mistrz', 'Składacz Sklejki'];
+      return occupations[Math.floor(Math.random() * occupations.length)];
+    }
+
+    function generateRandomOccupation2() {
+      const occupations = ['Twój stary', 'Spermojad', 'Cumidło', 'Gej', 'Lesbijka', 'Zgniatacz Jonder', 'Operator Proncia'];
+      return occupations[Math.floor(Math.random() * occupations.length)];
+    }
+
+    function generateRandomOccupation3() {
+      const occupations = ['Twoja stara', 'Operator mikrofalówki', 'Predator dzieci', 'Morderca LGBT', 'Youtuber', 'Tiktoker'];
+      return occupations[Math.floor(Math.random() * occupations.length)];
+    }
+
+    function generateRandomOccupation() {
+      const occupation1 = generateRandomOccupation1();
+      const occupation2 = generateRandomOccupation2();
+      const occupation3 = generateRandomOccupation3();
+      const occupations = [`${occupation1}`,`${occupation2}`,`${occupation3}`,`${occupation2} i ${occupation3}`];
+      return occupations[Math.floor(Math.random() * occupations.length)];
+    }
+
+    function generateRandomAddress() {
+      const streets = ['Ul. Jajeczna', 'Plac Twojej Starej', 'Bulwar Męski', 'Bulwar Kobiecy', 'Ul. Dużego Penisa', 'Ul. Małego Penisa', 'Ul. Średniego Penisa', 'Śmietnik pod mostem', 'Plac Giga Prącia'];
+      const cities = ['Bydgoszcz', 'Penisville', 'Pronciarnia', 'Nowy Cock', 'Dicktown'];
+      const states = ['Polska', 'Cockland', 'Dickemcy', 'Australia', 'Księżyc'];
+      return `${Math.floor(Math.random() * 1000) + 1} ${streets[Math.floor(Math.random() * streets.length)]}, ${cities[Math.floor(Math.random() * cities.length)]}, ${states[Math.floor(Math.random() * states.length)]}`;
+    }
+
+    function generateRandomIP() {
+      return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+    }
+
+    function generateRandomSSN() {
+      return `${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}-${Math.floor(Math.random() * 100).toString().padStart(2, '0')}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+    }
+
+    function generateRandomCreditCard() {
+      const cardTypes = ['MasterDaddy Bank', 'ProncieCard', 'Jaja Express', 'Duży Penis Bank', 'Małe Jądra Bank', 'Kobiecy Bank Polski'];
+      const cardType = cardTypes[Math.floor(Math.random() * cardTypes.length)];
+      const cardNumber = Array(16).fill(0).map(() => Math.floor(Math.random() * 10)).join('');
+      return `${cardType}: ${cardNumber}`;
+    }
+
+    function generateRandomPhoneNumber() {
+      const phoneNumber = Array(9).fill(0).map(() => Math.floor(Math.random() * 10)).join('');
+      return `${phoneNumber}`;
+    }
+
+    function generateRandomEmails(firstName, lastName) {
+      const domains = ['gmail.com', 'jaja.com', 'hotmilf.com', 'nocock.com', 'twoja.stara', 'niemam.jaj'];
+      const numEmails = Math.floor(Math.random() * 3) + 1; // Generate 1 to 3 email addresses
+      const emails = [];
+      for (let i = 0; i < numEmails; i++) {
+        const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+        const randomNumber = Math.floor(Math.random() * 1000);
+        emails.push(`${firstName.toLowerCase()}.${lastName.toLowerCase()}${randomNumber}@${randomDomain}`);
+      }
+      return emails;
+    }
+
+    function generateRandomHobby() {
+      const hobbies = ['Żonglerka Jajami', 'Przeklinanie', 'Granie w CS', 'Rzeźbienie Penisów', 'Jedzenie Jedzenia Jedzeniowato-Jedzeniowego', 'Sport ekstremalny: Szachy', 'Intergalaktyczna Obserwacja Jąder', 'Bycie w kartelu małych penisów', 'Zabijanie', 'Malowanie własnego prącia', 'Fotografia męskich osobników', 'Ssanie Penisów kolegów', 'Czytanie podręcznika z biologii na stronie 69', 'Cięcie sobie żył', 'Torturowanie polonistów', 'Gotowanie ludzi żywcem', 'Zakopywanie jąder w piasku', 'Wspinaczka po osobnikach męskich', 'Bicie mięsa', 'walenie swojej pochwy', 'Nurkowanie w spermie', 'Bieganie po jajach innych męskich', 'Kradzież tożsamości', 'Nagie modelowanie', 'Skręcanie innym jaj', 'Odcinanie prącia niewinnym męskim (i damskim) osobnikom', 'Catfishing geji i zamykanie ich w piwnicy', 'Prowadzenie nielegalnego zakładu w piwnicy w którym pracują Chińczycy', 'Kolekcjonowanie męskich członków', 'Podpalanie sierocińców', 'Rysowanie nagich damskich obiektów', 'Przyszywnie innym fiutów do głowy', 'Dominowanie nieletnich', 'Oświecanie jajami przedszkolaków', 'Zmienianie płci', 'Bycie pedofilem', 'Fotografowanie koleżanek z klasy kiedy sie przebierają', 'Hodowla zwierząt (ludzi) na farmie', 'Popełnianie zbrodni wojennych', 'Podkładanie materiałów wybuchowych pod szkoły'];
+      return hobbies[Math.floor(Math.random() * hobbies.length)];
+    }
+
+    function generateRandomShape() {
+      const Shapes = [
+        'siusiaka',
+        'waginy',
+        'kotka',
+        'Kuzara',
+      ];
+      return Shapes[Math.floor(Math.random() * Shapes.length)];
+    }
+
+    function generateRandomJob() {
+      const Job = [
+        'siusiakiem którego będzie ssała',
+        'jej prywatnym obciągaczem',
+        'toaletą której będzie używała',
+        'chłopakiem do dominowania w smutnych chwilach',
+      ];
+      return Job[Math.floor(Math.random() * Job.length)];
+    }
+
+    function generateRandomMalePerson() {
+      const Person = [
+        'Tata',
+        'Dziadek',
+        'Andrzej Duda',
+        'Błażej',
+        'Losowy bezdomny z ulicy',
+        'Jego Kolega z klasy'
+      ];
+      return Person[Math.floor(Math.random() * Person.length)];
+    }
+
+    function generateRandomFemalePerson() {
+      const Person = [
+        'Mama',
+        'Twoja stara',
+        'Babcia',
+        'Nauczycielka',
+        'Jego siostra o której nikt nie wie',
+        'Losowa dziwka z ulicy',
+        'Jego koleżanka z klasy'
+      ];
+      return Person[Math.floor(Math.random() * Person.length)];
+    }
+
+    function generateRandomFunFact() {
+      const shape = generateRandomShape();
+      const job = generateRandomJob();
+      const malePerson = generateRandomMalePerson();
+      const femalePerson = generateRandomFemalePerson();
+      const funFacts = [
+        'Jest takim gejem, że jego Penis zmienia kolory',
+        'Jest lesbijkiem',
+        'Mówi, że ma największe prącie, ale nie może tego udowodnić',
+        'Ma kolekcję 1,001 różnych rodzajów jajek',
+        'Zwyzywa cię w siedmiu różnych językach',
+        'Posiada rekord świata w ilości razy ile zmienił płeć',
+        'Skutecznie nauczył złotą rybkę obciągać',
+        'Nigdy nie widział swojego penisa',
+        'Śpi wyłącznie z chłopakami',
+        'Ma niewidzialnego chuja',
+        'Kolekcjonuje kolegów z klasy w swoim łóżku',
+        'Nigdy nie wygrał w papier, kamień, nożyce',
+        `Uważa, że Ziemia jest w kształcie ${shape}`,
+        `${femalePerson} zmusiła go, żeby został ${job}`,
+        `${femalePerson} zmusiła go, żeby został ${job}`,
+        `${femalePerson} mu obciągała`,
+        `${malePerson} to jego chłopak`,
+        'Zawsze ma w kieszeni jądra żeby je zjeść jak będzie głodny',
+        'Umie zatrzymać czas na 3 sekundy kiedy ktoś go kopnie w jaja',
+        'Telepatycznie rozmawia ze swoim prąciem',
+        'Tak bardzo chciał dziewczynę, że zmienił płeć i udaje lesbijkę',
+        'Jest bi-sexualny, ale nie lubi kobiet',
+        'Chciałby się przespać z boykisserem',
+        `Był w więzieniu 24 razy i za każdym razem wystawił 5 gwiazdkową opinię`,
+        `Potrafi zrobić loda dziewczynie`,
+        `Kiedyś był mężczyzną`,
+        `${femalePerson} jest jego dziewczyną`,
+        `Woli płaskie bo przypominają mężczyzn`,
+        `${femalePerson} zrobiła mu loda`,
+        `Pomagał Binladenowi`,
+        `Daje dupy za talerz zupy`,
+        `Binladen to jego ${malePerson}`,
+        `Pali więcej niż przeciętny lekarz za komuny`,
+        `W porównaniu z nim geje są hetero`,
+        `Jest RGB`,
+        `Oświecił przedszkolaki jajami`,
+        `Jak mu stanie pała to nią po ścianie napierdala`,
+        `Lubi ssać dzieci`,
+        `Śpi z przytulanką`,
+        `Przespał się z femboyem bo nie wiedział, że kobiety nie mają penisa`,
+        `Woli młodszych`,
+        `Jest to drugi Stuu (Inaczej dwustuu)`,
+        `Jest czarny`,
+        `poszedł do piekła, ale było zajęte więc wrócił spowrotem na Ziemię`,
+        `Wysadził ładunek wybuchowy w toalecie jak ${malePerson} na niej siedział`,
+        `Pali dzieci w piwnicy`,
+        `Napisał własną książkę z autorskimi przepisami z ludzi`,
+        `Codziennie gada na vc, bo chce słyszeć głos chłopaków`,
+        `Jego ulubioną stroną na internecie jest Furry34.com`,
+        `Jest żydem`,
+        `Był w Czarnobylu podczas eksplozji i teraz mu świeci pała`,
+        `Ma zakaz zbliżania się do przedszkoli i szkół`,
+        `Nigdy się nie zbliżyła do niego kobieta na bliżej niż kilometr (nawet jego własna matka)`,
+        `Jak się podnieci to każdy chłopak w okolicy jest zagrożony`,
+        `Ma taką gejowską aurę, że nawet trawa zmienia przy nim kolory`,
+        `Zgwałcił siebie samego`,
+        `Kobieta go zgwałciła`,
+        `Ma tęczową pałę`,
+        `Jest taką pizdą, że mu jedna urosła`,
+        `Chodzi do szkoły bez spodni, żeby wszyscy widzieli jakiego ma małego`,
+        `Ma najwyższe IQ na świecie (ale liczone tak jak oceny w Niemczech)`,
+        `Test ciążowy wyszedł mu 7, a test na IQ pozytywny`,
+        `Został zapłodniony przez kobietę`,
+        `${malePerson} mu obciągał`,
+        `W jego domu była orgia, ale nie był zaproszony`,
+        `Był w trójkącie i ani razu nie dotknął dziewczyny`,
+        `Nie wie ile kosztuje chleb`,
+        `Jego głowa ma kształt ${shape}`,
+        `Nie wie co ma w komputerze`,
+        `Ma więcej uzbrojenia niż amerykańskie wojsko`,
+        `Ciągnie go do spermy bardziej niż Amerykan do ropy`,
+        `Nie kąpał się tak dawno, że woda przy nim paruje`,
+        `Policjanci go pokazują dziecią jako przykład pedofila`,
+        `Zatrudnił się w przedszkolu, żeby dzieci mu siadały na jajkach`,
+        `Wie, że jego koledzy walą do niego konia i to go podnieca`,
+        `Łóżko śpi na nim`,
+        `Chce mieć przynajmniej 5 cm, ale to niemożliwe`,
+        'Odwiedza PornHuba więcej niż 50 razy dziennie'      
+      ];
+      return funFacts[Math.floor(Math.random() * funFacts.length)];
+    }
+
+    function generateRandomFear() {
+      const fears = ['Siebie samego', 'Jest nieustraszony', 'Kobiet', 'Daniela', 'Szkoły', 'Szlugomistrza', 'Pani Czarnusi', 'Wpierdolu', 'Emocji', 'Praktyczności', 'Twojej starej', 'Trawy', 'Waginy', 'Siusiaka', 'Jajek', 'Deszczu', 'Męskich członków', 'Czarnych', 'Azjatów', 'Indian'];
+      return fears[Math.floor(Math.random() * fears.length)];
+    }
+
+    function generateRandomDate(start, end) {
+      const date = new Date(start + Math.random() * (end - start), Math.random() * 12, Math.random() * 31);
+      return date.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function generateRandomFood() {
+      const malePerson = generateRandomMalePerson();
+      const femalePerson = generateRandomFemalePerson();
+      const foods = ['Jaja', 'Prącie', 'Mały męski', 'Nigdy nic nie jadł', 'Ludzkie mięso', 'Liście', 'Twoja stara', 'Sperma', 'Metal', 'Własny męski', 'Wagina', 'Cum Krzyśka', 'Członkowie LGBT', `${malePerson}`, `${femalePerson}`];
+      return foods[Math.floor(Math.random() * foods.length)];
+    }
+
+    function generateRandomPet() {
+      const pets = ['Obiad', 'Twoja stara', 'Telefon', 'Axolotl', 'Welociraptor', 'Damski Narwal', 'Żyrafa z krótką szyją', 'Teleportujący Się Żółw', 'Kot z trzema głowami', 'Sąsiad'];
+      return pets[Math.floor(Math.random() * pets.length)];
+    }
+
+    function generateRandomTransport() {
+      const shape = generateRandomShape();
+      const job = generateRandomJob();
+      const malePerson = generateRandomMalePerson();
+      const femalePerson = generateRandomFemalePerson();
+      const transports = ['Cały czas siedzi w domu', 'Czarne chmury', 'Rower', 'Buty', 'Autobus', 'Auto', 'Pociąg', 'Helikopter', 'Samolot', 'Statek kosmiczny', 'UFO', `${femalePerson}`, `${malePerson}`, 'Siusiak', 'Jaja', 'Murzyn', 'Sanki (zwłaszcza w lato)', 'Dziurawy spadochron', 'Rakieta Nazara', 'Teleporter', 'Tunel przez środek Ziemi', 'Klaps w dupe', 'Kanały'];
+      return transports[Math.floor(Math.random() * transports.length)];
+    }
+
+    function generateRandomBodyPart() {
+      const malePerson = generateRandomMalePerson();
+      const femalePerson = generateRandomFemalePerson();
+      const gadgets = ['Jaja', 'Prącie', 'Twarz', 'Moszna', 'Dupa', 'Osobowość', 'Sześciopak', 'Plecy', 'Stopy', 'Włosy', 'Oczmi', 'Usta', 'Kostki', 'Biodra', 'Klatka piersiowa (zwłaszcza ta kobieca)', 'Uda', 'Nerki', 'Mózg'];
+      return gadgets[Math.floor(Math.random() * gadgets.length)];
+    }
+
+    function generateRandomVacation() {
+      const malePerson = generateRandomMalePerson();
+      const femalePerson = generateRandomFemalePerson();
+      const vacations = ['Twoja stara', 'Cały czas jest na wakacjach', 'Nie chce na wakacje', 'Trumna', 'Prącie Pani Nauczycielki', 'Mars', `${malePerson}, a dokładniej jego siusiak`, `${femalePerson}, a dokładniej jej prywatna część na dole`, 'Kepler27B', 'Dom boykissera', 'Kryjówka Binladena w Pakistanie', 'Kostnica', 'Do Królowej Elżbiety', 'W jedną stronę do piekła', 'Piekarnik', 'Prysznicu z gazem', 'Dom swojego chłopaka', 'Szuflada', 'Szkoła', 'Kwatera pornhuba', 'Jądro Ziemi', 'Własny dom', 'Prącie Nazara', 'Szpitala (jako pacjent)', 'Psychiatryk (już i tak tam jest)'];
+      return vacations[Math.floor(Math.random() * vacations.length)];
+    }
+
+    function generateRandomTalent() {
+      const talents = ['Śpiewanie (tak naprawdę to nie)',
+      'Potykanie się o własne jaja',
+      'Przewidywanie Reklam TV',
+      'Komunikacja z Roślinami Doniczkowymi (schizofremik)',
+      'Nic nie umie lamus jeden',
+      'Umie skręcić każdemu jaja',
+      'Fotograficzna Pamięć',
+      'Jedzenie',
+      'Psychiczne Znęcanie się',
+      'Żonglowanie Jajami',
+      `Umie się przespać z każdą nauczycielką jaką zechce`,
+      `Umie skręcić ci prącie używając tylko swoich ust`,
+      `Rozmawia z jajami`,
+      `Ma kotka zamiast męskiego`,
+      `Umie jeść kotki od koleżanek z klasy`,
+      `Umie wypić piwo 110%`,
+      `Potrafi porwać 30 osób w 24 godziny`,
+      `Potrafi obciągnąć własnego męskiego własnymi ustami`,
+      `Zdejmie dziewczynie majtki zanim tamta zdąży zadzwonić na policję`,
+      `Jest tak dużym gejem, że potrafi ci wysuszyć siura w 3 minuty`,
+      `W 3 godziny potrafi zjeść jedną bułkę`,
+      `Zje 37 pączków w 2 minuty (ale grubas)`,
+      `Pobije ci tak mocno, że sam padnie`,
+      `Zaśnie na kanapie w 48 sekund`,
+      `Umie włączyć cheaty w -3 sekundy`,
+      `Zabije kobietę własnym prąciem`,
+      `Umie skręcić własne jaja siłą woli`,
+      `Jak się bardzo postara to będzie umiał wyjść rano z łóżka`,
+      `Czasami potrafi wstać od komputera`,
+      `Potrafi zrobić 3 pompki`,
+      `Potrafi zrobić przysiad z dodatkowymi 2 kg`,
+      `Zakocha się w chłopaku w 3 sekundy pp jego zobaczeniu`,
+      `Kiedy wejdzie na wagę to waga pokazuje error`,
+      `Zaprogramuje całą grę wideo (gdyby miał to być tylko jeden przycisk i miałby pomoc od sztucznej inteligencji)`,
+      `Zrobienie kupy na kiblu zajmie mu tylko 3,5 godziny`,
+      `Zgwałci wszystko co mu przyjdzie do głowy`,
+      `Będzie się całować z każdym chłopakiem którego spotka na ulicy`,
+      `Wysadzi szkołę jeśli dasz mu materiały wybuchowe`,
+      `Dobrze połyka spermę`,
+      `przejdzie labirynt z jednym zakrętem w jedynie 8 godzin`,
+      `Potrafi zjeść cały szwedzki stół`,
+      `Potrafi ssać pałe bezdomnym`,
+      `Nigdy mu pała nie stanie`,
+      `Utopi się w łyżce wody`,
+      `Upije się jedną kroplą piwa 0%`,
+      'Widzi po twarzy kto ma jakiego chuja'
+    ];
+      return talents[Math.floor(Math.random() * talents.length)];
+    }
+
+    function generateRandomCatchphrase() {
+      const malePerson = generateRandomMalePerson();
+      const femalePerson = generateRandomFemalePerson();
+      const catchphrases = [
+        "Moje jaja są widoczne!",
+        "Trzymaj moje piwo 0%, pokaże ci jak to się robi!",
+        "To bardziej skręcone niż jaja w czarnej dziurze!",
+        "No, smaruj moje bułki i nazywaj mnie panem czasu!",
+        "Nie mówię, że to byli kosmici, ale... to byli kosmici.",
+        "Jedzenie!",
+        "Zachowaj spokój i spanikuj.",
+        "Nie jestem leniwy, jestem w trybie oszczędzania energii.",
+        "Teoretycznie",
+        "Nie kłócę się, tylko wyjaśniam, dlaczego mam rację, a ty nie debilu.",
+        `Chcę polizać ci jaja!`,
+        `Nie jestem sexistą, po prostu nie lubię kobiet`,
+        `Fuck me daddy ;3`,
+        `Kocham chłopaków bardziej niż swój komputer`,
+        `Nie wiem i się nie dowiem`,
+        `Lubię jak ${femalePerson} mnie dominuje`,
+        `Zdominuj mnie proszę`,
+        `Oliwier ma małego`,
+        `Cukier jest zdrowy i nie mam jego za dużo ja potrzebuje pomocy za durzo gozjdłm ichybaumieram`,
+        `Narkotyki są fajne`,
+        `Pobije ci mięso jak się do mnie zbliżysz`,
+        `Kiedyś ${malePerson} udeżył mnie swoją pałą po twarzy`,
+        `${femalePerson} i ${malePerson} to moi  rodzice`,
+        `${femalePerson} ma smacznego kotka`,
+        `Lubię lizać jaja kolegów`,
+        `Mam małego`,
+        `Miałbym dużego gdyby nie to, że zmieniłem płeć`,
+        `Mój ${malePerson} ma smacznego męskiego`,
+        `Lubię się zabawiać z mężczyznami`,
+        `Szkoła jest fajna`,
+        `${femalePerson} ma siusiaka`,
+        `${malePerson} nie ma siusiaka`,
+        `Kobiety to takie fajny rzeczy materialne`,
+        `${femalePerson} ma fajne jaja, wiem bo smakowałem`,
+        `Jaja są zawsze smaczne`,
+        `Prącie jest super, kocham je lizać`,
+        `Te dzieci zaraz wejdą do mnie do środka`,
+        `Nic do ciebie nie mam, zwłaszcza szacunku`,
+        `Lubię spać z moimi nauczycielkami`,
+        `${malePerson} rymuje się z 'debil z małymi jajami'`,
+        `Putin is gay, czyli Władimir to gejuszek`,
+        `Pani Nygusia, Dickusia, Podsłuchusia, Sexusia, Jajusia, Kolegusia, Siusiakusia, Spermusia, wszystko mie jedno, i tak się z nią prześpię`,
+        `${femalePerson} była fajna w łóżku`,
+        `Duże balony są najważniejsze`,
+        'Aresztujcie mnie, jego już nie odruchacie',
+        'Wielkość nie ma znaczenia, ważne jest jak nim operujesz',
+        'Nie jest mały tylko jest w wielkości dla dzieci',
+        'ence pence w której spermce'
+      ];
+      return catchphrases[Math.floor(Math.random() * catchphrases.length)];
+    }
+  </script>
+</body>
+</html>

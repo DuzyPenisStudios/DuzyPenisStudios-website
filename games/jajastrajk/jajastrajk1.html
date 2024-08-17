@@ -1,0 +1,456 @@
+<html><head>
+<title>Jaja Strajk 1</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1a1a1a;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #2a2a2a;
+  border: 2px solid #444;
+  position: relative;
+  overflow: hidden;
+}
+
+#background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+#ak47 {
+  width: 300px;
+  height: 150px;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  transform-origin: bottom left;
+  transition: transform 0.1s ease-out;
+  z-index: 2;
+}
+
+.target {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff0000 0%, #ff0000 40%, #ffffff 40%, #ffffff 60%, #ff0000 60%, #ff0000 100%);
+  z-index: 1;
+}
+
+#score {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 24px;
+  z-index: 3;
+}
+
+#time {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  z-index: 3;
+}
+
+#crosshair {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.bullet {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: #ffff00;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.bullet-trail {
+  position: absolute;
+  background-color: rgba(255, 255, 0, 0.3);
+  pointer-events: none;
+  z-index: 2;
+}
+
+#menu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1000;
+}
+
+#menu h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+#menu button {
+  font-size: 18px;
+  padding: 10px 20px;
+  margin: 10px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+#menu button:hover {
+  background-color: #45a049;
+}
+
+#latest-score {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div id="game-container">
+  <svg id="background" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+    <!-- Sky -->
+    <rect x="0" y="0" width="100" height="66.67" fill="#87CEEB"/>
+    
+    <!-- Ground (green) -->
+    <rect x="0" y="66.67" width="100" height="33.33" fill="#228B22"/>
+    
+    <!-- Buildings (reduced height) -->
+    <rect x="6.25" y="46.67" width="12.5" height="20" fill="#808080"/>
+    <rect x="8.75" y="50" width="2.5" height="5" fill="#FFFFFF"/>
+    <rect x="13.75" y="50" width="2.5" height="5" fill="#FFFFFF"/>
+    <rect x="8.75" y="58" width="2.5" height="5" fill="#FFFFFF"/>
+    <rect x="13.75" y="58" width="2.5" height="5" fill="#FFFFFF"/>
+    
+    <rect x="25" y="40" width="15" height="26.67" fill="#A0522D"/>
+    <rect x="27.5" y="43" width="3.125" height="6.67" fill="#FFFFFF"/>
+    <rect x="34.375" y="43" width="3.125" height="6.67" fill="#FFFFFF"/>
+    <rect x="27.5" y="53" width="3.125" height="6.67" fill="#FFFFFF"/>
+    <rect x="34.375" y="53" width="3.125" height="6.67" fill="#FFFFFF"/>
+    
+    <rect x="50" y="36.67" width="18.75" height="30" fill="#4682B4"/>
+    <rect x="53.125" y="40" width="3.75" height="6" fill="#FFFFFF"/>
+    <rect x="61.875" y="40" width="3.75" height="6" fill="#FFFFFF"/>
+    <rect x="53.125" y="50" width="3.75" height="6" fill="#FFFFFF"/>
+    <rect x="61.875" y="50" width="3.75" height="6" fill="#FFFFFF"/>
+    
+    <rect x="75" y="43.33" width="16.25" height="23.34" fill="#8B008B"/>
+    <rect x="77.5" y="46" width="3.125" height="6" fill="#FFFFFF"/>
+    <rect x="85.625" y="46" width="3.125" height="6" fill="#FFFFFF"/>
+    <rect x="77.5" y="56" width="3.125" height="6" fill="#FFFFFF"/>
+    <rect x="85.625" y="56" width="3.125" height="6" fill="#FFFFFF"/>
+  </svg>
+  
+  <svg id="ak47" viewBox="0 0 300 150">
+    <defs>
+      <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#36454F;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#4F5D6B;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#36454F;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="woodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#A0522D;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#8B4513;stop-opacity:1" />
+      </linearGradient>
+      <filter id="shadow">
+        <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000" flood-opacity="0.3"/>
+      </filter>
+      <pattern id="woodPattern" patternUnits="userSpaceOnUse" width="10" height="10">
+        <rect width="10" height="10" fill="url(#woodGradient)"/>
+        <path d="M0,0 Q5,10 10,0 T20,0" stroke="#5D2906" stroke-width="0.5" fill="none"/>
+      </pattern>
+    </defs>
+    
+    <!-- Main body -->
+    <path d="M200,75 L40,75 L40,60 L270,60 L270,90 L40,90 L40,75" fill="url(#metalGradient)" filter="url(#shadow)"/>
+    
+    <!-- Shadows -->
+    <path d="M20,90 L270,90" stroke="#1a1a1a" stroke-width="1" fill="none" opacity="0.5"/>
+    
+    <!-- Stock -->
+    <path d="M20,60 Q15,75 20,90 L50,90 Q60,82 60,75 Q60,68 50,60 Z" fill="url(#woodPattern)" filter="url(#shadow)"/>
+    <path d="M50,65 L55,65 L55,85 L50,85 Z" fill="#5d2906"/>
+    
+    <!-- Grip -->
+    <path d="M80,75 Q80,100 75,120 L95,120 Q90,100 90,75 Z" fill="url(#woodPattern)" filter="url(#shadow)"/>
+    <path d="M82,80 L88,80 L88,115 L82,115 Z" fill="#5d2906"/>
+    
+    <!-- Magazine -->
+    <path d="M120,75 L150,75 L155,120 L115,120 Q112,100 120,75 Z" fill="url(#metalGradient)" filter="url(#shadow)"/>
+    <path d="M125,80 L145,80 L148,115 L122,115 Z" fill="#36454F"/>
+    
+    <!-- Barrel -->
+    <rect x="165" y="69" width="105" height="12" fill="url(#metalGradient)" filter="url(#shadow)"/>
+    <path d="M165,69 Q160,72 160,75 Q160,78 165,81" fill="url(#metalGradient)"/>
+    
+    <!-- Front sight -->
+    <path d="M265,69 L270,60 L275,69 Z" fill="#2F4F4F" filter="url(#shadow)"/>
+    
+   
+    
+    <!-- Top rail -->
+    <rect x="80" y="60" width="160" height="6" fill="url(#metalGradient)" filter="url(#shadow)"/>
+    <path d="M80,60 L85,57 L235,57 L240,60" fill="url(#metalGradient)"/>
+    
+    <!-- Details -->
+    <circle cx="210" cy="75" r="4" fill="#2F4F4F"/>
+    
+    
+    <!-- Gas tube -->
+    <rect x="165" y="63" width="80" height="4" fill="#2F4F4F" filter="url(#shadow)"/>
+    
+    <!-- Muzzle brake -->
+    <path d="M270,69 L285,65 L285,81 L270,77 Z" fill="#2F4F4F" filter="url(#shadow)"/>
+    
+    <!-- Receiver details -->
+    <path d="M150,60 L165,60 L165,90 L150,90 Q153,75 150,60 Z" fill="#2F4F4F" filter="url(#shadow)"/>
+    <rect x="155" y="65" width="5" height="20" fill="#36454F"/>
+    
+    
+    
+    <!-- Wood grain effect on stock and grip -->
+    <path d="M25,65 Q30,75 25,85 M35,62 Q40,75 35,88 M45,60 Q50,75 45,90" stroke="#5d2906" stroke-width="1" fill="none"/>
+    <path d="M82,85 Q85,95 82,105 M86,85 Q89,95 86,105" stroke="#5d2906" stroke-width="1" fill="none"/>
+    
+    <!-- Metal texture -->
+    <rect x="100" y="65" width="140" height="20" fill="url(#metalGradient)" opacity="0.1"/>
+    
+    <!-- Highlights -->
+    <path d="M165,69 L270,69" stroke="#D3D3D3" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M84,58 L236,58" stroke="#D3D3D3" stroke-width="1" fill="none" opacity="0.5"/>
+    
+  
+    
+    <!-- Screws and bolts -->
+    
+    
+    <!-- Trigger -->
+   
+    
+    <!-- Selector switch -->
+    
+  </svg>
+  <div id="score">Punkty: 0</div>
+  <div id="time">Czas: 20</div>
+</div>
+<svg id="crosshair" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="48" stroke="#ffffff" stroke-width="2" fill="none"/>
+  <line x1="0" y1="50" x2="100" y2="50" stroke="#ffffff" stroke-width="2"/>
+  <line x1="50" y1="0" x2="50" y2="100" stroke="#ffffff" stroke-width="2"/>
+</svg>
+
+<div id="menu">
+  <h1>Jaja Strajk: Strzelanka 2d</h1>
+  <div id="latest-score">Poprzedni Wynik: 0</div>
+  <button id="play-button">Graj</button>
+  <button id="quit-button">Opuść</button>
+</div>
+
+<script>
+let score = 0;
+let timeLeft = 20;
+let gameLoop;
+let ak47;
+let targets = [];
+let crosshair;
+let mouseX = 0;
+let mouseY = 0;
+let latestScore = 0;
+
+function showMenu() {
+    document.getElementById('menu').style.display = 'block';
+    document.body.style.cursor = 'default';
+    document.getElementById('latest-score').textContent = `Poprzedni Wynik: ${latestScore}`;
+}
+
+function hideMenu() {
+    document.getElementById('menu').style.display = 'none';
+    document.body.style.cursor = 'none';
+}
+
+function startGame() {
+    hideMenu();
+    score = 0;
+    timeLeft = 20;
+    targets = [];
+    updateScore();
+    updateTime();
+    ak47 = document.getElementById('ak47');
+    crosshair = document.getElementById('crosshair');
+    gameLoop = setInterval(update, 20);
+    document.addEventListener('mousemove', moveGunAndCrosshair);
+    document.addEventListener('click', shoot);
+    spawnTarget();
+}
+
+function moveGunAndCrosshair(e) {
+    const gameContainer = document.getElementById('game-container');
+    const rect = gameContainer.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+
+    crosshair.style.left = `${e.clientX - 10}px`;
+    crosshair.style.top = `${e.clientY - 10}px`;
+
+    const gunX = 20;
+    const gunY = window.innerHeight - 20;
+    const angle = Math.atan2(mouseY - gunY, mouseX - gunX);
+    const degrees = angle * (180 / Math.PI);
+    ak47.style.transform = `rotate(${degrees}deg)`;
+}
+
+function shoot() {
+    const gameContainer = document.getElementById('game-container');
+    const rect = gameContainer.getBoundingClientRect();
+    const shootX = mouseX;
+    const shootY = mouseY;
+
+    const gunRect = ak47.getBoundingClientRect();
+    const gunCenterX = gunRect.left + gunRect.width / 2 - rect.left;
+    const gunCenterY = gunRect.top + gunRect.height / 2 - rect.top;
+    const barrelLength = 150;
+    const angle = Math.atan2(shootY - gunCenterY, shootX - gunCenterX);
+    const startX = gunCenterX + Math.cos(angle) * barrelLength;
+    const startY = gunCenterY + Math.sin(angle) * barrelLength;
+
+    const bullet = document.createElement('div');
+    bullet.className = 'bullet';
+    bullet.style.left = `${startX}px`;
+    bullet.style.top = `${startY}px`;
+    gameContainer.appendChild(bullet);
+
+    const trail = document.createElement('div');
+    trail.className = 'bullet-trail';
+    trail.style.left = `${startX}px`;
+    trail.style.top = `${startY}px`;
+    trail.style.width = '2px';
+    gameContainer.appendChild(trail);
+
+    const startTime = performance.now();
+    const animateBullet = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / 100, 1);
+
+        const currentX = startX + (shootX - startX) * progress;
+        const currentY = startY + (shootY - startY) * progress;
+
+        bullet.style.left = `${currentX}px`;
+        bullet.style.top = `${currentY}px`;
+
+        trail.style.width = `${Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2))}px`;
+        trail.style.transform = `rotate(${Math.atan2(currentY - startY, currentX - startX)}rad)`;
+
+        if (progress < 1) {
+            requestAnimationFrame(animateBullet);
+        } else {
+            setTimeout(() => {
+                bullet.remove();
+                trail.remove();
+            }, 100);
+        }
+    };
+
+    requestAnimationFrame(animateBullet);
+
+    const recoilX = (Math.random() - 0.5) * 10;
+    const recoilY = -Math.random() * 5;
+    const currentTransform = ak47.style.transform;
+    ak47.style.transform = `${currentTransform} translate(${recoilX}px, ${recoilY}px)`;
+    setTimeout(() => {
+        ak47.style.transform = currentTransform;
+    }, 100);
+
+    targets.forEach((target, index) => {
+        const targetRect = target.getBoundingClientRect();
+        const targetX = targetRect.left - rect.left + targetRect.width / 2;
+        const targetY = targetRect.top - rect.top + targetRect.height / 2;
+        const distance = Math.sqrt(Math.pow(shootX - targetX, 2) + Math.pow(shootY - targetY, 2));
+
+        if (distance < 20) {
+            target.remove();
+            targets.splice(index, 1);
+            score += 10;
+            updateScore();
+            spawnTarget();
+        }
+    });
+}
+
+function spawnTarget() {
+    const target = document.createElement('div');
+    target.className = 'target';
+    target.style.left = `${Math.random() * (window.innerWidth - 40)}px`;
+    target.style.top = `${Math.random() * (window.innerHeight - 40)}px`;
+    document.getElementById('game-container').appendChild(target);
+    targets.push(target);
+}
+
+function update() {
+    timeLeft -= 1 / 50;
+    updateTime();
+    if (timeLeft <= 0) {
+        gameOver();
+    }
+}
+
+function updateScore() {
+    document.getElementById('score').textContent = `Score: ${score}`;
+}
+
+function updateTime() {
+    document.getElementById('time').textContent = `Time: ${Math.ceil(timeLeft)}`;
+}
+
+function gameOver() {
+    clearInterval(gameLoop);
+    document.removeEventListener('mousemove', moveGunAndCrosshair);
+    document.removeEventListener('click', shoot);
+    removeAllTargets(); // Call the function to remove all targets
+    latestScore = score;
+    showMenu();
+}
+
+function removeAllTargets() {
+    targets.forEach(target => {
+        target.remove();
+    });
+    targets = [];
+}
+
+document.getElementById('play-button').addEventListener('click', startGame);
+document.getElementById('quit-button').addEventListener('click', () => {
+    window.location.href = 'jajastrajkmenu.html';
+});
+
+showMenu();
+</script>
+</body></html>

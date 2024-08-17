@@ -1,0 +1,584 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jaja Strajk 3D Edition - Daytime Shooter</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  #game-container {
+    width: 100%;
+    height: 100%;
+  }
+  #crosshair {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  #hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #fff;
+    font-size: 18px;
+    z-index: 1000;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  #score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #fff;
+    font-size: 18px;
+    z-index: 1000;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  #reload-message {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 24px;
+    display: none;
+    z-index: 1000;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  #timer {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 36px;
+    font-weight: bold;
+    z-index: 1000;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  #game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+    display: none;
+    z-index: 2000;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+  }
+  #restart-button {
+    margin-top: 20px;
+    font-size: 24px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+
+  /* Menu Styles from Jaja Strajk 1 */
+  #menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #000000cc;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    
+  }
+
+  #menu h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+
+  #menu button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+
+  #menu button:hover {
+    background-color: #45a049;
+  }
+
+  #latest-score {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <svg id="crosshair" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="48" stroke="#fff" stroke-width="2" fill="none" />
+    <line x1="0" y1="50" x2="100" y2="50" stroke="#fff" stroke-width="2" />
+    <line x1="50" y1="0" x2="50" y2="100" stroke="#fff" stroke-width="2" />
+  </svg>
+  <div id="hud">
+    Health: <span id="health">100</span> | Ammo: <span id="ammo">30</span>
+  </div>
+  <div id="score">Wynik: <span id="score-value">0</span></div>
+  <div id="reload-message">Przeładowywanie...</div>
+  <div id="timer">20</div>
+  <div id="game-over">
+    Game Over!<br>
+    Final Score: <span id="final-score"></span><br>
+    <button id="restart-button">Restart</button>
+  </div>
+</div>
+
+<!-- Menu from Jaja Strajk 1 -->
+<div id="menu">
+  <h1>Jaja Strajk: Strzelanka 3D</h1>
+  <div id="latest-score">Poprzedni Wynik: 0</div>
+  <button id="play-button">Graj</button>
+  <button id="quit-button">Opuść</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.getElementById('game-container').appendChild(renderer.domElement);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+  scene.add(ambientLight);
+  
+  const sunLight = new THREE.DirectionalLight(0xffffcc, 1);
+  sunLight.position.set(50, 100, 50);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  sunLight.shadow.camera.near = 1;
+  sunLight.shadow.camera.far = 500;
+  sunLight.shadow.camera.left = -100;
+  sunLight.shadow.camera.right = 100;
+  sunLight.shadow.camera.top = 100;
+  sunLight.shadow.camera.bottom = -100;
+  scene.add(sunLight);
+
+  // Sky
+  const skyColor = new THREE.Color(0x87CEEB); // Light sky blue for daytime
+  scene.background = skyColor;
+
+  // Player
+  const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
+  const playerMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+  const player = new THREE.Mesh(playerGeometry, playerMaterial);
+  player.position.set(0, 1, 0);
+  player.castShadow = true;
+  player.receiveShadow = true;
+  scene.add(player);
+
+  // Ground with green grass color
+  const groundGeometry = new THREE.PlaneGeometry(100, 100);
+  const grassColor = new THREE.Color(0x2ecc71); // Bright green color
+  const groundMaterial = new THREE.MeshPhongMaterial({ color: grassColor });
+  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Buildings with gray color
+  function createBuilding(x, z, width, height, depth) {
+    const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
+    const buildingMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 }); // Gray color
+    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+    building.position.set(x, height / 2, z);
+    building.castShadow = true;
+    building.receiveShadow = true;
+    scene.add(building);
+  }
+
+  // Create some buildings
+  createBuilding(-20, -20, 10, 25, 10);
+  createBuilding(18, -15, 7, 20, 7);
+  createBuilding(-15, 20, 6, 18, 6);
+  createBuilding(20, 25, 5, 15, 5);
+
+  // Trees
+  function createTree(x, z) {
+    const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+    const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+    trunk.position.set(x, 1, z);
+    trunk.castShadow = true;
+    trunk.receiveShadow = true;
+    scene.add(trunk);
+
+    const leavesGeometry = new THREE.ConeGeometry(1.5, 3, 8);
+    const leavesMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 }); // Forest green color
+    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+    leaves.position.set(x, 3.5, z);
+    leaves.castShadow = true;
+    leaves.receiveShadow = true;
+    scene.add(leaves);
+  }
+
+  // Add more trees
+  for (let i = 0; i < 20; i++) {
+    const x = Math.random() * 80 - 40; // Random x position between -40 and 40
+    const z = Math.random() * 80 - 40; // Random z position between -40 and 40
+    createTree(x, z);
+  }
+
+  // Camera setup
+  camera.position.set(0, 2, 5);
+  camera.lookAt(player.position);
+
+  // Controls
+  let moveForward = false;
+  let moveBackward = false;
+  let moveLeft = false;
+  let moveRight = false;
+
+  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keyup', onKeyUp);
+
+  function onKeyDown(event) {
+    switch (event.code) {
+      case 'KeyW': moveForward = true; break;
+      case 'KeyS': moveBackward = true; break;
+      case 'KeyA': moveLeft = true; break;
+      case 'KeyD': moveRight = true; break;
+    }
+  }
+
+  function onKeyUp(event) {
+    switch (event.code) {
+      case 'KeyW': moveForward = false; break;
+      case 'KeyS': moveBackward = false; break;
+      case 'KeyA': moveLeft = false; break;
+      case 'KeyD': moveRight = false; break;
+    }
+  }
+
+  // Mouse look
+  let pitch = 0;
+  let yaw = 0;
+  document.addEventListener('mousemove', (event) => {
+    if (document.pointerLockElement === document.body) {
+      yaw -= event.movementX * 0.002;
+      pitch -= event.movementY * 0.002;
+      pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+    }
+  });
+
+  // Lock pointer
+  document.getElementById('game-container').addEventListener('click', () => {
+    document.body.requestPointerLock();
+  });
+
+  // Weapon model
+  const weaponGroup = new THREE.Group();
+  const gunGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.5);
+  const gunMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+  const gun = new THREE.Mesh(gunGeometry, gunMaterial);
+  gun.position.set(0.2, -0.2, -0.5);
+  weaponGroup.add(gun);
+
+  const sightGeometry = new THREE.BoxGeometry(0.02, 0.05, 0.02);
+  const sightMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+  const sight = new THREE.Mesh(sightGeometry, sightMaterial);
+  sight.position.set(0.2, -0.15, -0.25);
+  weaponGroup.add(sight);
+
+  scene.add(weaponGroup);
+
+  // Weapon
+  let ammo = 30;
+  const ammoDisplay = document.getElementById('ammo');
+  const reloadTime = 2000; // 2 seconds
+  let isReloading = false;
+  const reloadMessage = document.getElementById('reload-message');
+
+  // Load sound effects
+  const listener = new THREE.AudioListener();
+  camera.add(listener);
+
+  const soundLoader = new THREE.AudioLoader();
+  const shootSound = new THREE.Audio(listener);
+  const reloadSound = new THREE.Audio(listener);
+
+  soundLoader.load('https://freesound.org/data/previews/641/641704_5674468-lq.mp3', (buffer) => {
+    shootSound.setBuffer(buffer);
+    shootSound.setVolume(0.5);
+  });
+
+  soundLoader.load('https://freesound.org/data/previews/649/649529_14085421-lq.mp3', (buffer) => {
+    reloadSound.setBuffer(buffer);
+    reloadSound.setVolume(0.5);
+  });
+
+  function shoot() {
+    if (ammo > 0 && !isReloading && !gameOver) {
+      ammo--;
+      ammoDisplay.textContent = ammo;
+      
+      // Play shoot sound
+      if (shootSound.isPlaying) {
+        shootSound.stop();
+      }
+      shootSound.play();
+
+      // Weapon recoil animation
+      gsap.to(weaponGroup.position, {
+        y: "+=0.05",
+        z: "+=0.05",
+        duration: 0.05,
+        yoyo: true,
+        repeat: 1
+      });
+
+      // Muzzle flash
+      const flashGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+      const flashMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+      const flash = new THREE.Mesh(flashGeometry, flashMaterial);
+      flash.position.set(0.2, -0.15, -0.8);
+      weaponGroup.add(flash);
+      setTimeout(() => weaponGroup.remove(flash), 50);
+
+      // Raycast for hit detection
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+      const intersects = raycaster.intersectObjects(targets);
+      
+      if (intersects.length > 0) {
+        const hitTarget = intersects[0].object;
+        scene.remove(hitTarget);
+        targets = targets.filter(t => t !== hitTarget);
+        updateScore(10);
+        createTarget(); // Create a new target
+      }
+
+      if (ammo === 0) {
+        reload();
+      }
+    }
+  }
+
+  function reload() {
+    if (!isReloading && !gameOver) {
+      isReloading = true;
+      reloadMessage.style.display = 'block';
+      
+      // Play reload sound
+      if (reloadSound.isPlaying) {
+        reloadSound.stop();
+      }
+      reloadSound.play();
+
+      // Reload animation
+      gsap.to(weaponGroup.rotation, {
+        x: Math.PI / 2,
+        duration: 0.5,
+        yoyo: true,
+        repeat: 1,
+        onComplete: () => {
+          setTimeout(() => {
+            ammo = 30;
+            ammoDisplay.textContent = ammo;
+            isReloading = false;
+            reloadMessage.style.display = 'none';
+          }, reloadTime - 1000);
+        }
+      });
+    }
+  }
+
+  document.addEventListener('click', shoot);
+  document.addEventListener('keydown', (event) => {
+    if (event.code === 'KeyR') reload();
+  });
+
+  // Targets
+  let targets = [];
+  const maxTargets = 5;
+
+  function createTarget() {
+    if (targets.length < maxTargets) {
+      const targetGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+      const targetMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+      const target = new THREE.Mesh(targetGeometry, targetMaterial);
+      
+      // Random position within a certain range
+      target.position.set(
+        Math.random() * 40 - 20,
+        Math.random() * 10 + 1,
+        Math.random() * 40 - 20
+      );
+      
+      target.castShadow = true;
+      target.receiveShadow = true;
+      scene.add(target);
+      targets.push(target);
+    }
+  }
+
+  // Initial targets
+  for (let i = 0; i < maxTargets; i++) {
+    createTarget();
+  }
+
+  // Score
+  let score = 0;
+  const scoreDisplay = document.getElementById('score-value');
+
+  function updateScore(points) {
+    score += points;
+    scoreDisplay.textContent = score;
+  }
+
+  // Timer
+  let timeLeft = 20;
+  const timerDisplay = document.getElementById('timer');
+  let gameOver = false;
+
+  function updateTimer() {
+    if (timeLeft > 0) {
+      timeLeft--;
+      timerDisplay.textContent = timeLeft;
+    } else {
+      endGame();
+    }
+  }
+
+  function endGame() {
+    gameOver = true;
+    showMenu()
+    document.getElementById('final-score').textContent = score;
+    document.exitPointerLock();
+  }
+
+  function restartGame() {
+    score = 0;
+    scoreDisplay.textContent = score;
+    timeLeft = 20;
+    timerDisplay.textContent = timeLeft;
+    gameOver = false;
+    document.getElementById('game-over').style.display = 'none';
+    
+    // Reset player position
+    player.position.set(0, 1, 0);
+    camera.position.set(0, 2, 5);
+    
+    // Reset targets
+    targets.forEach(target => scene.remove(target));
+    targets = [];
+    for (let i = 0; i < maxTargets; i++) {
+      createTarget();
+    }
+    
+    // Reset ammo
+    ammo = 30;
+    ammoDisplay.textContent = ammo;
+    
+    // Restart the timer
+    clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+  }
+
+  document.getElementById('restart-button').addEventListener('click', restartGame);
+
+  let timerInterval = setInterval(updateTimer, 1000);
+
+  // Game loop
+  function animate() {
+    requestAnimationFrame(animate);
+
+    if (!gameOver) {
+      // Player movement
+      const speed = 0.1;
+      const direction = new THREE.Vector3();
+      const rotation = new THREE.Quaternion();
+      rotation.setFromEuler(new THREE.Euler(0, yaw, 0));
+
+      if (moveForward) direction.z -= speed;
+      if (moveBackward) direction.z += speed;
+      if (moveLeft) direction.x -= speed;
+      if (moveRight) direction.x += speed;
+
+      direction.applyQuaternion(rotation);
+      player.position.add(direction);
+
+      // Update camera and weapon
+      camera.position.copy(player.position);
+      camera.position.y += 1.5; // Eye level
+      camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+
+      weaponGroup.position.copy(camera.position);
+      weaponGroup.quaternion.copy(camera.quaternion);
+
+      // Animate targets
+      targets.forEach(target => {
+        target.rotation.y += 0.01;
+        target.position.y += Math.sin(Date.now() * 0.003) * 0.01;
+      });
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // Resize handler
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  function showMenu() {
+    document.getElementById('menu').style.display = 'block';
+    document.body.style.cursor = 'default';
+    document.getElementById('latest-score').textContent = `Poprzedni Wynik: ${score}`;
+  }
+
+  function hideMenu() {
+    document.getElementById('menu').style.display = 'none';
+    document.body.style.cursor = 'default';
+  }
+
+  function startGame() {
+    hideMenu();
+    restartGame();
+  }
+
+  document.getElementById('play-button').addEventListener('click', startGame);
+  document.getElementById('quit-button').addEventListener('click', () => {
+    window.location.href = 'jajastrajkmenu.html';
+  });
+
+  showMenu();
+</script>
+</body>
+</html>
