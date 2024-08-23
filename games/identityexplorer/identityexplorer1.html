@@ -1,6 +1,7 @@
 <html>
 <head>
 <title>IdentityExplorer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper scaling on mobile -->
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -56,7 +57,7 @@
     padding: 20px;
     border-radius: 4px;
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 16px; /* Standardize font size */
     line-height: 1;
   }
   .info-item {
@@ -120,14 +121,12 @@
       display: inline-block;
       width: 180px;
     }
-    #result, #additional-info {
-    background-color: #ecf0f1;
-    padding: 20px;
-    border-radius: 4px;
-    margin-top: 20px;
-    font-size: 16px;
-    line-height: 1;
   }
+
+  @media (max-width: 767px) {
+    #result, #additional-info {
+      font-size: 16px; /* Adjust font size specifically for mobile */
+    }
   }
 </style>
 </head>
