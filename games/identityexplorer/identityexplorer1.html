@@ -8,7 +8,7 @@
     margin: 0;
     padding: 10px;
     color: #333;
-    font-size: 16px;
+    font-size: 18px;
   }
   .container {
     max-width: 100%;
@@ -22,26 +22,29 @@
   h1, h2 {
     color: #2c3e50;
     text-align: center;
+    font-size: 2em;
   }
   form {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     margin-bottom: 20px;
   }
   input[type="text"] {
-    width: 60%;
-    padding: 10px;
-    font-size: 16px;
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
     border: 1px solid #ddd;
-    border-radius: 4px 0 0 4px;
+    border-radius: 4px;
+    margin-bottom: 10px;
   } 
   button {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 12px 20px;
+    font-size: 18px;
     background-color: #3498db;
     color: white;
     border: none;
-    border-radius: 0 4px 4px 0;
+    border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
   }
@@ -53,6 +56,8 @@
     padding: 20px;
     border-radius: 4px;
     margin-top: 20px;
+    font-size: 16px;
+    line-height: 1;
   }
   .info-item {
     margin-bottom: 10px;
@@ -60,11 +65,11 @@
   .info-label {
     font-weight: bold;
     color: #2c3e50;
-    display: inline-block;
-    width: 180px;
+    display: block;
+    margin-bottom: 5px;
   }
   .disclaimer {
-    font-size: 12px;
+    font-size: 14px;
     color: #7f8c8d;
     text-align: center;
     margin-top: 20px;
@@ -73,8 +78,8 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    padding: 5px 10px;
-    font-size: 0.8em;
+    padding: 8px 12px;
+    font-size: 0.9em;
     background-color: gray;
     color: white;
     border: none;
@@ -89,13 +94,14 @@
   @media (min-width: 768px) {
     body {
       padding: 20px;
+      font-size: 18px;
     }
     .container {
       max-width: 800px;
       padding: 30px;
     }
     h1, h2 {
-      font-size: 2em;
+      font-size: 2.5em;
     }
     form {
       flex-direction: row;
@@ -114,6 +120,14 @@
       display: inline-block;
       width: 180px;
     }
+    #result, #additional-info {
+    background-color: #ecf0f1;
+    padding: 20px;
+    border-radius: 4px;
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1;
+  }
   }
 </style>
 </head>
