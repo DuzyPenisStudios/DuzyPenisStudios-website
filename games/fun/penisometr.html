@@ -1,0 +1,199 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../images/duzypenisstudios/favicon.png" type="image/png">
+<style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 550px;
+            width: 90%;
+        }
+        h1 {
+            color: #4a4a4a;
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input {
+            width: 70%;
+            background-color: #f0f0f0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            margin-top: 30px;
+        }
+        .person {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            animation: fadeIn 0.5s ease-out;
+            overflow: hidden; /* Prevent overflow */
+            text-align: left; /* Align text to the left */
+            white-space: nowrap; /* Prevent text wrapping */
+            text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+        }
+        .bar {
+            height: 25px;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            margin-left: 15px;
+            border-radius: 12.5px;
+            transition: width 0.5s ease-out;
+        }
+        .winner {
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 1.2em;
+            margin-top: 20px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍆 Penisometr 3000 🍆</h1>
+        <input type="text" id="name" placeholder="Wpisz imię uczestnika">
+        <button onclick="addPerson()">Dodaj Uczestnika</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let people = [];
+
+        function detectGender(firstName) {
+            const maleNames = ['andrea', 'kuba', 'barnaba'];
+            const femaleNames = ['emi', 'doti', 'domi', 'ami', 'nati', 'gabi', 'noemi', 'abigail', 'karmen', 'nel', 'nicole'];
+            const specialNames = ['bixorr','bixor','kuzar','daniel']; // Add any special names you want here
+
+            if (specialNames.includes(firstName.toLowerCase())) {
+                return 'special';
+            } else if (maleNames.includes(firstName.toLowerCase())) {
+                return 'male';
+            } else if (femaleNames.includes(firstName.toLowerCase())) {
+                return 'female';
+            } else if (firstName.slice(-1).toLowerCase() === 'a') {
+                return 'female';
+            } else {
+                return 'male';
+            }
+        }
+
+        function addPerson() {
+    let name = document.getElementById('name').value.trim(); // Get and trim the input value
+
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+
+    // Check if the name field is empty
+    if (!name) {
+        return;
+    }
+
+    // Check if the name already exists in the people array
+    if (people.some(person => person.name.toLowerCase() === name.toLowerCase())) {
+        alert('Nie możesz wprowadzić tej samej osoby dwukrotnie!');
+        return;
+    }
+
+    // Truncate the name if it exceeds 25 characters
+    if (name.length > 25) {
+        name = name.substring(0, 25) + '...'; // trim the name and append '...'
+    }
+
+    const gender = detectGender(firstName);
+
+    if (firstName) {
+        let length;
+        if (gender === 'female') {
+            length = 0; // Length is 0 for female names
+        } else if (gender === 'special') {
+            length = 24.3; // Special names have a fixed length of 24.3
+        } else if (gender === 'male') {
+            length = Math.random() * 20 + 5; // Random length between 5 and 25 cm for male names
+        }
+        people.push({ name, length });
+    }
+
+    document.getElementById('name').value = ''; // Clear the input field
+    updateResults();  // Update the displayed results
+}
+
+        function updateResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            people.sort((a, b) => b.length - a.length);
+
+            people.forEach((person, index) => {
+                const personDiv = document.createElement('div');
+                personDiv.className = 'person';
+                if (person.length === 0) {
+                    personDiv.innerHTML = `
+                        <span>${index + 1}. ${person.name}: 🚫</span>
+                    `;
+                } else {
+                    personDiv.innerHTML = `
+                        <span>${index + 1}. ${person.name}: ${person.length.toFixed(1)} cm</span>
+                        <div class="bar" style="width: ${person.length * 8}px;"></div>
+                    `;
+                }
+                resultsDiv.appendChild(personDiv);
+            });
+
+            if (people.length > 0) {
+                const winner = people[0];
+                const winnerDiv = document.createElement('div');
+                winnerDiv.className = 'winner';
+                winnerDiv.innerHTML = `🏆 Zwycięzca: ${winner.name} z ${winner.length.toFixed(1)} cm! 🏆`;
+                resultsDiv.appendChild(winnerDiv);
+            }
+        }
+
+        // Add event listener for Enter key
+        document.getElementById('name').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addPerson();
+            }
+        });
+    </script>
+</body>
+</html>
