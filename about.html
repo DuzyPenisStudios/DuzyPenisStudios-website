@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Duży Penis Studios™ - O Nas</title>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duży Penis Studios™</title>
+    <link rel="icon" href="images/duzypenisstudios/favicon.png" type="image/png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
   
@@ -104,10 +104,14 @@
     .about-image {
       flex-basis: 40%;
       position: relative;
+      aspect-ratio: 1 / 1; /* This ensures the aspect ratio is always 1:1, creating a square */
+      overflow: visible; /* To ensure the content inside respects the aspect ratio */
     }
-  
+
     .about-image img {
       width: 100%;
+      height: 100%;
+      object-fit: cover; /* Ensures the image covers the container while maintaining its aspect ratio */
       border-radius: 20px;
       box-shadow: var(--box-shadow);
     }
@@ -282,7 +286,7 @@
             <h2>O Duży Penis Studios™</h2>
             <p>Witaj w świecie Duży Penis Studios™, gdzie innowacja spotyka się z kreatywnością, a granice cyfrowych doświadczeń są stale przesuwane. Założone w 2024 roku przez grupę pasjonatów gier i technologii, nasze studio szybko stało się liderem w tworzeniu gier z dużym penisem.</p>
             <p>Nasza misja jest prosta: tworzyć gry, które nie tylko mają duże penisy, ale mają największe penisy. Wierzymy, że gry mają moc kształtowania rzeczywistości i wpływania na sposób, w jaki postrzegamy świat.</p>
-            <p>W Duży Penis Studios™ łączymy najnowocześniejsze technologie z autystyczną wizją, tworząc "unikalne" światy, w których gracze mogą się zanurzyć i odkrywać penisy. Od epickich przygód RPG po innowacyjne gry mobilne, każdy nasz projekt jest starannie dopracowany, aby dostarczyć niezapomniane wrażenia.</p>
+            <p>W Duży Penis Studios™ łączymy najnowocześniejsze technologie z artystyczną wizją, tworząc "unikalne" światy, w których gracze mogą się zanurzyć i odkrywać penisy. Od epickich przygód RPG po innowacyjne gry mobilne, każdy nasz projekt jest starannie dopracowany, aby dostarczyć niezapomniane wrażenia.</p>
           </div>
           <div class="about-image">
             <img src="images\duzypenisstudios\duzypenisstudios-logo.jpg" alt="Duży Penis Studios" width="460" height="460">
@@ -313,9 +317,10 @@
       <div class="container">
         <h2>Poznaj Nasz Zespół</h2>
         <div class="team-grid">
-            <div class="team-member">
+          <div class="team-member">
             <img src="images/team/bixorr.png" alt="Bixorr" width="300" height="300">
             <h3>Bixorr</h3>
+            <p>CEO</p>
             <p>Główny programista &amp; deweloper 95% rzeczy</p>
           </div>
           <div class="team-member">
@@ -326,7 +331,7 @@
           <div class="team-member">
             <img src="images/team/retrix240.png" alt="Retrix240" width="300" height="300">
             <h3>Retrix240</h3>
-            <p>CEO &amp; Założyciel</p>
+            <p>Założyciel</p>
           </div>
         </div>
       </div>
