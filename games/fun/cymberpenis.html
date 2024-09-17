@@ -7,21 +7,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
-    background: linear-gradient(to bottom, #220000, #440000);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    background: #001a00;
     font-family: 'Arial', sans-serif;
     overflow: hidden;
     touch-action: none;
 }
 #gameCanvas {
-    border: 3px solid #ff0000;
+    border: 3px solid #006400;
     border-radius: 10px;
-    box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+    box-shadow: 0 0 10px #006400, 0 0 20px #006400, 0 0 30px #006400;
     filter: blur(0.5px);
     max-width: 100%;
     max-height: 80vh;
@@ -30,77 +30,45 @@ body {
     position: relative;
     font-size: 4vw;
     font-weight: 700;
-    color: #ff0000;
-    text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 15px #ff0000;
+    color: #00ff00;
+    text-shadow: 0 0 5px #006400, 0 0 10px #006400, 0 0 15px #006400;
     margin-bottom: 10px;
+}
+#rankDisplay {
+    font-size: 18px;
+    color: #00ff00;
+    margin-top: 10px;
+    text-shadow: 0 0 5px #006400, 0 0 10px #006400;
 }
 #startButton, #soundToggle, #pauseButton {
     font-size: 24px;
     padding: 10px 20px;
-    background-color: #ff0000;
-    color: #000;
+    background-color: #006400;
+    color: #00ff00;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     margin-top: 20px;
-    text-shadow: 0 0 5px #330000;
+    text-shadow: 0 0 5px #004d00;
 }
 #soundToggle, #pauseButton {
     margin-left: 10px;
-}
-#authContainer, #userInfo {
-    margin-bottom: 10px;
-    color: #ff0000;
-}
-#authContainer input, #authContainer button, #userInfo button {
-    margin-right: 5px;
-    padding: 5px;
-    background-color: #330000;
-    color: #ff0000;
-    border: 1px solid #ff0000;
 }
 @media (min-width: 768px) {
     #scoreBoard {
         font-size: 24px;
     }
 }
-@keyframes sadFaceAnimation {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+#authContainer, #userInfo {
+    margin-bottom: 10px;
+    color: #00ff00;
 }
-@keyframes happyFaceAnimation {
-    0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-    50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 1; }
-}
-#sadFace, #happyFace {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 100px;
-    opacity: 0;
-    pointer-events: none;
-}
-#sadFace {
-    animation: sadFaceAnimation 1s ease-out;
-    animation-fill-mode: forwards;
-}
-#happyFace {
-    animation: happyFaceAnimation 1s ease-out;
-    animation-fill-mode: forwards;
-}
-#speedSelector {
-    margin-top: 20px;
-    color: #fff;
-    font-size: 18px;
-}
-#speedSelector label {
-    margin-right: 15px;
-    cursor: pointer;
-}
-#speedSelector input[type="radio"] {
+#authContainer input, #authContainer button, #userInfo button {
     margin-right: 5px;
+    padding: 5px;
+    background-color: #330000;
+    color: #00ff00;
+    border: 1px solid #00ff00;
 }
 </style>
 </head>
@@ -115,7 +83,8 @@ body {
   <span id="loggedInUser"></span>
   <button id="logoutBtn">Logout</button>
 </div>
-<div id="scoreBoard">PLAYER: 0     IA: 0 | Rank: Silver 1</div>
+<div id="scoreBoard">PLAYER: 0     IA: 0</div>
+<div id="rankDisplay"></div>
 <canvas id="gameCanvas"></canvas>
 <div id="sadFace" style="display: none;">😟</div>
 <div id="happyFace" style="display: none;">😃</div>
@@ -124,8 +93,8 @@ body {
     <button id="soundToggle">🔊 Sound On</button>
     <button id="pauseButton">⏸️ Pause</button>
 </div>
-<div id="speedSelector">
-    <label><input type="radio" name="speed" value="normal" checked> Normal</label>
+<div id="speedSelector" style="display: none;">
+    <label><input type="radio" name="speed" value="medium" checked> Medium</label>
 </div>
 <script>
 const canvas = document.getElementById('gameCanvas');
@@ -136,81 +105,28 @@ const soundToggle = document.getElementById('soundToggle');
 const pauseButton = document.getElementById('pauseButton');
 const sadFace = document.getElementById('sadFace');
 const happyFace = document.getElementById('happyFace');
-const speedSelector = document.getElementById('speedSelector');
+const authContainer = document.getElementById('authContainer');
+const userInfo = document.getElementById('userInfo');
+const loggedInUser = document.getElementById('loggedInUser');
 
 let currentUser = null;
+let playerRank = 0;
+const ranks = [
+    "Silver 1", "Silver 2", "Silver 3", "Silver 4", "Elitarne Srebro",
+    "Mistrzowskie Elitarne Srebro", "Gold 1", "Gold 2", "Gold 3", "Gold 4",
+    "MG 1", "MG 2", "MG Elite", "DMG", "Legendary Eagle", "Supreme", "Global Elite",
+    "Duży Penis"
+];
 
-function showAuthForm() {
-  document.getElementById('authContainer').style.display = 'block';
-  document.getElementById('userInfo').style.display = 'none';
-  startButton.style.display = 'none';
-}
-
-function showUserInfo() {
-  document.getElementById('authContainer').style.display = 'none';
-  document.getElementById('userInfo').style.display = 'block';
-  document.getElementById('loggedInUser').textContent = `Logged in as: ${currentUser}`;
-  startButton.style.display = 'inline-block';
-}
-
-function register() {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  if (username && password) {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    if (users[username]) {
-      alert('Username already exists');
-    } else {
-      users[username] = { password, rank: 0, score: 0 };
-      localStorage.setItem('users', JSON.stringify(users));
-      login(username);
-    }
-  }
-}
-
-function login(username) {
-  const users = JSON.parse(localStorage.getItem('users') || '{}');
-  if (users[username]) {
-    currentUser = username;
-    playerRank = users[username].rank;
-    playerScore = users[username].score;
-    showUserInfo();
-    updateScore();
-  }
-}
-
-function logout() {
-  currentUser = null;
-  showAuthForm();
-}
-
-function saveProgress() {
-  if (currentUser) {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    users[currentUser].rank = playerRank;
-    users[currentUser].score = playerScore;
-    localStorage.setItem('users', JSON.stringify(users));
-  }
-}
-
-document.getElementById('registerBtn').addEventListener('click', register);
-document.getElementById('loginBtn').addEventListener('click', () => login(document.getElementById('username').value));
-document.getElementById('logoutBtn').addEventListener('click', logout);
-
-// Existing game variables
 let paddle, aiPaddle, puck, goal;
 let gameStarted = false;
 let soundOn = true;
-let speed = 'normal';
-let gameSpeed = 1;
+const gameSpeed = 1;
 let isPaused = false;
 
-// Add these variables at the beginning of the script
-let playerScore = 0, aiScore = 0;
-let playerRank = 0;
-const ranks = ['Silver 1', 'Silver 2', 'Silver 3', 'Gold 1', 'Gold 2', 'Sheriff', 'Supreme', 'CyberElite'];
+let wins = 0;
+let losses = 0;
 
-// Web Audio API setup
 let audioContext;
 let masterGainNode;
 
@@ -218,7 +134,7 @@ function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     masterGainNode = audioContext.createGain();
     masterGainNode.connect(audioContext.destination);
-    masterGainNode.gain.value = 0.5; // Adjust overall volume
+    masterGainNode.gain.value = 0.5;
 }
 
 function playSound(type, frequency, duration) {
@@ -241,25 +157,25 @@ function playSound(type, frequency, duration) {
 }
 
 function playHitSound() {
-    playSound('sine', 440, 0.1); // A4 note, short duration
+    playSound('sine', 440, 0.1);
 }
 
 function playGoalSound(scorer) {
     if (scorer === 'Player') {
-        playSound('square', 440, 0.3); // A4 note, square wave for player
+        playSound('square', 440, 0.3);
     } else {
-        playSound('sawtooth', 220, 0.3); // A3 note, sawtooth wave for AI
+        playSound('sawtooth', 220, 0.3);
     }
 }
 
 function playWinSound() {
-    playSound('square', 880, 0.5); // A5 note, even longer duration
+    playSound('square', 880, 0.5);
 }
 
 function playArpeggio() {
     if (!soundOn || !audioContext) return;
 
-    const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+    const notes = [261.63, 329.63, 392.00, 523.25];
     const duration = 0.2;
 
     notes.forEach((frequency, index) => {
@@ -282,19 +198,51 @@ function playArpeggio() {
     });
 }
 
-function updateRank() {
-    if (playerScore >= 7) {
-        playerRank = Math.min(playerRank + 1, ranks.length - 1);
-        playerScore = 0;
-        aiScore = 0;
-    }
+function drawCountdown(text) {
+    ctx.fillStyle = 'rgba(0,26,0,0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = `bold ${canvas.width * 0.18}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(0,26,0,0.5)';
+    ctx.fillText(text, canvas.width / 2 + 4, canvas.height / 2 + 4);
+    ctx.fillStyle = '#00ff00';
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#006400';
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    ctx.shadowBlur = 0;
 }
 
 function initializeGameObjects() {
-    paddle = {radius: canvas.width * 0.0625, color: '#ff0000'};  // Changed to red
-    aiPaddle = {radius: canvas.width * 0.0625, speed: canvas.width * 0.009, color: '#800080'};  // Changed to purple
-    puck = {radius: canvas.width * 0.0375, speed: canvas.width * 0.0225};
+    paddle = {radius: canvas.width * 0.0625, color: '#004d00'};
+    aiPaddle = {radius: canvas.width * 0.0625, speed: canvas.width * 0.009, color: '#008000'};
+    puck = {
+        radius: canvas.width * 0.0375,
+        speed: canvas.width * (
+            isVeryEasyRank() ? 0.015 :
+            isEasyRank() ? 0.02 :
+            isHardRank() ? 0.03 :
+            isVeryHardRank() ? 0.035 :
+            0.0225
+        )
+    };
     goal = {width: canvas.width * 0.375, height: canvas.height * 0.0167};
+}
+
+function isVeryEasyRank() {
+    return playerRank <= ranks.indexOf("Mistrzowskie Elitarne Srebro");
+}
+
+function isEasyRank() {
+    return playerRank > ranks.indexOf("Mistrzowskie Elitarne Srebro") && playerRank <= ranks.indexOf("Gold 4");
+}
+
+function isHardRank() {
+    return playerRank >= ranks.indexOf("Legendary Eagle") && playerRank <= ranks.indexOf("Supreme");
+}
+
+function isVeryHardRank() {
+    return playerRank === ranks.indexOf("Global Elite");
 }
 
 function resizeCanvas() {
@@ -317,7 +265,6 @@ function resizeCanvas() {
 
     initializeGameObjects();
 
-    // Reset positions
     resetPositions();
 }
 
@@ -330,9 +277,9 @@ function resetPositions() {
 }
 
 window.addEventListener('resize', resizeCanvas);
-resizeCanvas();  // Initial call to set up the canvas
+resizeCanvas();
 
-let lastScoreTime = 0, puckStuckTime = 0, aiWaitTime = 0, aiState = 'normal';
+let playerScore = 0, aiScore = 0, lastScoreTime = 0, puckStuckTime = 0, aiWaitTime = 0, aiState = 'normal';
 let goalEffect = {active: false, startTime: 0, scorer: ''};
 let particles = [];
 let fireworks = [];
@@ -350,124 +297,94 @@ function resetPuck() {
 
 function launchPuck() {
     const angle = Math.random() * Math.PI * 2;
-    puck.dx = Math.cos(angle) * puck.speed * gameSpeed;
-    puck.dy = Math.sin(angle) * puck.speed * gameSpeed;
+    const speedModifier = isVeryEasyRank() ? 0.7 : 1;
+    puck.dx = Math.cos(angle) * puck.speed * gameSpeed * speedModifier;
+    puck.dy = Math.sin(angle) * puck.speed * gameSpeed * speedModifier;
 }
 
 resetPuck();
 
 function drawTable() {
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#220000');
-    gradient.addColorStop(1, '#440000');
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = '#001a00';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
-    for (let i = 0; i < canvas.width; i += 20) {
-        for (let j = 0; j < canvas.height; j += 20) {
-            ctx.beginPath();
-            ctx.arc(i, j, 1, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-    
-    // Draw center line
     ctx.beginPath();
     ctx.moveTo(0, canvas.height / 2);
     ctx.lineTo(canvas.width, canvas.height / 2);
-    ctx.strokeStyle = '#ff0000';
+    ctx.strokeStyle = '#006400';
     ctx.lineWidth = 2;
     ctx.stroke();
-    
-    // Draw center circle
+
     ctx.shadowBlur = 20;
-    ctx.shadowColor = '#ff0000';
+    ctx.shadowColor = '#006400';
     ctx.beginPath();
     ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width * 0.125, 0, Math.PI * 2);
-    ctx.strokeStyle = '#ff0000';
+    ctx.strokeStyle = '#006400';
     ctx.lineWidth = 2;
     ctx.stroke();
-    
-    // Enhance goal areas
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-    ctx.fillRect((canvas.width - goal.width) / 2, -5, goal.width, goal.height * 3);
-    ctx.fillRect((canvas.width - goal.width) / 2, canvas.height - goal.height * 3, goal.width, goal.height * 3);
-    
-    // Draw side borders with glow effect
+
+    ctx.fillStyle = '#006400';
+    ctx.fillRect((canvas.width - goal.width) / 2, -5, goal.width, goal.height);
+    ctx.fillRect((canvas.width - goal.width) / 2, canvas.height - 5, goal.width, goal.height);
+
     ctx.shadowBlur = 10;
-    ctx.shadowColor = '#ff0000';
+    ctx.shadowColor = '#006400';
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(0, canvas.height);
     ctx.moveTo(canvas.width, 0);
     ctx.lineTo(canvas.width, canvas.height);
-    ctx.strokeStyle = '#ff0000';
+    ctx.strokeStyle = '#006400';
     ctx.lineWidth = 4;
     ctx.stroke();
-    
-    ctx.shadowBlur = 0;
 
-    // Add this at the end of the function
-    ctx.font = `bold ${canvas.width * 0.03}px Arial`;
-    ctx.fillStyle = '#ff0000';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Rank: ${ranks[playerRank]}`, 10, 30);
+    ctx.shadowBlur = 0;
 }
 
 function drawPaddle(x, y, r, color) {
-    ctx.save();
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = color;
-
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
-    
+    ctx.closePath();
     ctx.beginPath();
-    ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = r * 0.1;
+    ctx.arc(x, y, r * 0.7, 0, Math.PI * 2);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+    ctx.closePath();
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = color;
     ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.5, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.lineWidth = r * 0.05;
-    ctx.stroke();
-    
-    ctx.restore();
+    ctx.shadowBlur = 0;
 }
 
 function drawPuck() {
-    ctx.save();
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = '#FFA500';
-    
     ctx.beginPath();
     ctx.arc(puck.x, puck.y, puck.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFA500';
+    ctx.fillStyle = '#00cc00';
     ctx.fill();
-
-    const gradient = ctx.createRadialGradient(puck.x, puck.y, 0, puck.x, puck.y, puck.radius);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-    gradient.addColorStop(1, 'rgba(255, 165, 0, 0.1)');
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    
-    ctx.restore();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(puck.x, puck.y, puck.radius * 0.8, 0, Math.PI * 2);
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.closePath();
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#00cc00';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
 }
 
 function createExplosion(x, y) {
-    for (let i = 0; i < 30; i++) {  // Reduced number of particles
+    for (let i = 0; i < 30; i++) {
         particles.push({
             x, y,
-            radius: Math.random() * 2 + 1,  // Smaller particles
-            color: `hsl(${0 + Math.random() * 30},100%,50%)`,  // Red hue
+            radius: Math.random() * 2 + 1,
+            color: `hsl(120, 100%, ${50 + Math.random() * 30}%)`,
             velocity: {
-                x: (Math.random() - 0.5) * 6 * simulationSpeedMultiplier * gameSpeed,  // Adjusted for game speed
-                y: (Math.random() - 0.5) * 6 * simulationSpeedMultiplier * gameSpeed
+                x: (Math.random() - 0.5) * 6 * simulationSpeedMultiplier,
+                y: (Math.random() - 0.5) * 6 * simulationSpeedMultiplier
             },
             alpha: 1
         });
@@ -475,15 +392,15 @@ function createExplosion(x, y) {
 }
 
 function drawExplosion() {
-    ctx.shadowBlur = 10;  // Reduced shadow blur
+    ctx.shadowBlur = 10;
     particles.forEach((p, i) => {
         if (p.alpha <= 0) {
             particles.splice(i, 1);
         } else {
-            p.velocity.y += 0.05 * simulationSpeedMultiplier * gameSpeed;
+            p.velocity.y += 0.05 * simulationSpeedMultiplier;
             p.x += p.velocity.x;
             p.y += p.velocity.y;
-            p.alpha -= 0.03 * simulationSpeedMultiplier * gameSpeed;  // Faster fade out
+            p.alpha -= 0.03 * simulationSpeedMultiplier;
             ctx.save();
             ctx.globalAlpha = p.alpha;
             ctx.shadowColor = p.color;
@@ -500,17 +417,17 @@ function drawExplosion() {
 function createFirework() {
     const x = Math.random() * canvas.width;
     const y = canvas.height;
-    const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    const color = `hsl(${120 + Math.random() * 60}, 100%, 50%)`;
     
     fireworks.push({
         x, y,
         color,
         radius: 2,
         velocity: {
-            x: (Math.random() - 0.5) * 2 * gameSpeed,
-            y: -Math.random() * 6 - 4 * gameSpeed  // Adjusted for game speed
+            x: (Math.random() - 0.5) * 2,
+            y: -Math.random() * 6 - 4
         },
-        gravity: 0.1 * gameSpeed,
+        gravity: 0.1,
         exploded: false,
         particles: []
     });
@@ -524,19 +441,19 @@ function updateFireworks() {
 
         if (fw.velocity.y >= 0 && !fw.exploded) {
             fw.exploded = true;
-            for (let i = 0; i < 30; i++) {  // Reduced number of particles
+            for (let i = 0; i < 30; i++) {  
                 const angle = Math.random() * Math.PI * 2;
-                const speed = (Math.random() * 2 + 1) * gameSpeed;  // Adjusted for game speed
+                const speed = (Math.random() * 2 + 1);
                 fw.particles.push({
                     x: fw.x,
                     y: fw.y,
-                    radius: Math.random() * 1.5 + 0.5,  // Smaller particles
+                    radius: Math.random() * 1.5 + 0.5,
                     color: fw.color,
                     velocity: {
                         x: Math.cos(angle) * speed,
                         y: Math.sin(angle) * speed
                     },
-                    gravity: 0.05 * gameSpeed,
+                    gravity: 0.05,
                     alpha: 1
                 });
             }
@@ -546,7 +463,7 @@ function updateFireworks() {
             p.x += p.velocity.x;
             p.y += p.velocity.y;
             p.velocity.y += p.gravity;
-            p.alpha -= 0.02 * gameSpeed;  // Faster fade out
+            p.alpha -= 0.02;
             return p.alpha > 0;
         });
 
@@ -555,7 +472,7 @@ function updateFireworks() {
 }
 
 function drawFireworks() {
-    ctx.shadowBlur = 10;  // Reduced shadow blur
+    ctx.shadowBlur = 10;
     fireworks.forEach(fw => {
         if (!fw.exploded) {
             ctx.beginPath();
@@ -585,13 +502,13 @@ function movePaddle(x, y) {
 }
 
 function handleMouseMove(e) {
-    if (!isPaused) {
+    if (!isPaused && gameStarted) {
         movePaddle(e.clientX, e.clientY);
     }
 }
 
 function handleTouchMove(e) {
-    if (!isPaused) {
+    if (!isPaused && gameStarted) {
         e.preventDefault();
         const touch = e.touches[0];
         movePaddle(touch.clientX, touch.clientY);
@@ -605,7 +522,19 @@ function isPuckStuck() {
 function moveAIPaddle() {
     const centerX = aiPaddle.x;
     const distanceFromCenter = Math.abs(centerX - canvas.width / 2);
-    
+    let difficultyModifier;
+    if (isVeryEasyRank()) {
+        difficultyModifier = 0.5;
+    } else if (isEasyRank()) {
+        difficultyModifier = 0.75;
+    } else if (isHardRank()) {
+        difficultyModifier = 1.25;
+    } else if (isVeryHardRank()) {
+        difficultyModifier = 1.5;
+    } else {
+        difficultyModifier = 1;
+    }
+
     if (aiState === 'normal' && isPuckStuck()) {
         aiState = 'retreating';
         puckStuckTime = 0;
@@ -618,8 +547,8 @@ function moveAIPaddle() {
         const dy = targetY - aiPaddle.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance > aiPaddle.speed) {
-            aiPaddle.x += dx / distance * aiPaddle.speed * simulationSpeedMultiplier * gameSpeed;
-            aiPaddle.y += dy / distance * aiPaddle.speed * simulationSpeedMultiplier * gameSpeed;
+            aiPaddle.x += dx / distance * aiPaddle.speed * simulationSpeedMultiplier;
+            aiPaddle.y += dy / distance * aiPaddle.speed * simulationSpeedMultiplier;
         } else {
             aiPaddle.x = targetX;
             aiPaddle.y = targetY;
@@ -627,35 +556,35 @@ function moveAIPaddle() {
             aiWaitTime = 0;
         }
     } else if (aiState === 'waiting') {
-        aiWaitTime += simulationSpeedMultiplier * gameSpeed;
-        if (aiWaitTime > 60) {  // Wait for 1 second (60 frames)
+        aiWaitTime += simulationSpeedMultiplier;
+        if (aiWaitTime > 60) {
             aiState = 'playing';
         }
     } else if (aiState === 'playing') {
         if (Math.abs(puck.x - centerX) > 5) {
-            aiPaddle.x += puck.x > centerX ? aiPaddle.speed * simulationSpeedMultiplier * gameSpeed : -aiPaddle.speed * simulationSpeedMultiplier * gameSpeed;
+            aiPaddle.x += puck.x > centerX ? aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier : -aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier;
         }
-        aiPaddle.y = Math.min(aiPaddle.y + aiPaddle.speed * simulationSpeedMultiplier * gameSpeed, canvas.height / 2 - aiPaddle.radius);
+        aiPaddle.y = Math.min(aiPaddle.y + aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier, canvas.height / 2 - aiPaddle.radius);
         if (aiPaddle.y === canvas.height / 2 - aiPaddle.radius) {
             aiState = 'normal';
         }
     } else if (aiState === 'normal') {
         if (puck.y < canvas.height / 2) {
             if (Math.abs(puck.x - centerX) > 5) {
-                aiPaddle.x += puck.x > centerX ? aiPaddle.speed * simulationSpeedMultiplier * gameSpeed : -aiPaddle.speed * simulationSpeedMultiplier * gameSpeed;
+                aiPaddle.x += puck.x > centerX ? aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier : -aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier;
             }
             if (puck.y > aiPaddle.y && Math.abs(puck.x - centerX) < 50) {
-                aiPaddle.y += aiPaddle.speed * simulationSpeedMultiplier * gameSpeed;
+                aiPaddle.y += aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier;
             } else {
-                aiPaddle.y += (50 - aiPaddle.y) * 0.05 * simulationSpeedMultiplier * gameSpeed;
+                aiPaddle.y += (50 - aiPaddle.y) * 0.05 * simulationSpeedMultiplier * difficultyModifier;
             }
         } else {
             if (distanceFromCenter > 70) {
-                aiPaddle.x += (canvas.width / 2 - centerX) * 0.03 * simulationSpeedMultiplier * gameSpeed;
+                aiPaddle.x += (canvas.width / 2 - centerX) * 0.03 * simulationSpeedMultiplier * difficultyModifier;
             } else if (Math.abs(puck.x - centerX) > 10) {
-                aiPaddle.x += puck.x > centerX ? aiPaddle.speed * simulationSpeedMultiplier * gameSpeed : -aiPaddle.speed * simulationSpeedMultiplier * gameSpeed;
+                aiPaddle.x += puck.x > centerX ? aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier : -aiPaddle.speed * simulationSpeedMultiplier * difficultyModifier;
             }
-            aiPaddle.y += (50 - aiPaddle.y) * 0.05 * simulationSpeedMultiplier * gameSpeed;
+            aiPaddle.y += (50 - aiPaddle.y) * 0.05 * simulationSpeedMultiplier * difficultyModifier;
         }
     }
     
@@ -679,14 +608,14 @@ function collisionDetection() {
     
     if (distancePlayer < puck.radius + paddle.radius) {
         const angle = Math.atan2(puck.y - paddle.y, puck.x - paddle.x);
-        puck.dx = Math.cos(angle) * puck.speed * gameSpeed;
-        puck.dy = Math.sin(angle) * puck.speed * gameSpeed;
+        puck.dx = Math.cos(angle) * puck.speed;
+        puck.dy = Math.sin(angle) * puck.speed;
         playHitSound();
     }
     if (distanceAI < puck.radius + aiPaddle.radius) {
         const angle = Math.atan2(puck.y - aiPaddle.y, puck.x - aiPaddle.x);
-        puck.dx = Math.cos(angle) * puck.speed * gameSpeed;
-        puck.dy = Math.sin(angle) * puck.speed * gameSpeed;
+        puck.dx = Math.cos(angle) * puck.speed;
+        puck.dy = Math.sin(angle) * puck.speed;
         playHitSound();
     }
     
@@ -726,26 +655,131 @@ function showHappyFace() {
     }, 1000);
 }
 
+function updateRankDisplay() {
+    const rankDisplay = document.getElementById('rankDisplay');
+    let difficulty;
+    if (isVeryEasyRank()) {
+        difficulty = "Very Easy";
+    } else if (isEasyRank()) {
+        difficulty = "Easy";
+    } else if (isHardRank()) {
+        difficulty = "Hard";
+    } else if (isVeryHardRank()) {
+        difficulty = "Very Hard";
+    } else {
+        difficulty = "Normal";
+    }
+    rankDisplay.textContent = `Rank: ${ranks[playerRank]} | Wins: ${wins} | Losses: ${losses} | Difficulty: ${difficulty}`;
+}
+
+function startFireworksShow() {
+    let fireworksCount = 0;
+    const maxFireworks = 10;
+    const fireworksInterval = setInterval(() => {
+        if (fireworksCount < maxFireworks) {
+            createFirework();
+            fireworksCount++;
+        } else {
+            clearInterval(fireworksInterval);
+        }
+    }, 300);
+}
+
 function updateScore() {
-    scoreBoard.innerHTML = `Player: ${playerScore} | AI: ${aiScore} | Rank: ${ranks[playerRank]}`;
+    scoreBoard.innerHTML = `Player: ${playerScore} | AI: ${aiScore} | Wins: ${wins} | Losses: ${losses}`;
     if (playerScore >= 7 || aiScore >= 7) {
         if (playerScore >= 7) {
             playArpeggio();
             startFireworksShow();
-            updateRank();
+            wins++;
+            if (wins >= 2) {
+                if (playerRank < ranks.length - 1) {
+                    playerRank++;
+                }
+                wins = 0;
+            }
         } else {
             playWinSound();
+            losses++;
+            if (losses >= 1) {
+                if (playerRank > 0) {
+                    playerRank--;
+                }
+                losses = 0;
+            }
         }
         playerScore = 0;
         aiScore = 0;
         gameStarted = false;
         startButton.style.display = 'inline-block';
-        speedSelector.style.display = 'block';
-        saveProgress();  // Save progress after updating rank
+        updateRankDisplay();
+        saveProgress();  
     }
 }
 
-// Modify the startButton event listener
+function showAuthForm() {
+  authContainer.style.display = 'block';
+  userInfo.style.display = 'none';
+  startButton.style.display = 'none';
+}
+
+function showUserInfo() {
+  authContainer.style.display = 'none';
+  userInfo.style.display = 'block';
+  loggedInUser.textContent = `Logged in as: ${currentUser}`;
+  startButton.style.display = 'inline-block';
+}
+
+function register() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  if (username && password) {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    if (users[username]) {
+      alert('Username already exists');
+    } else {
+      users[username] = { password, rank: 0, wins: 0, losses: 0, score: 0 };
+      localStorage.setItem('users', JSON.stringify(users));
+      login(username);
+    }
+  }
+}
+
+function login(username) {
+  const users = JSON.parse(localStorage.getItem('users') || '{}');
+  if (users[username]) {
+    currentUser = username;
+    playerRank = users[username].rank || 0;
+    wins = users[username].wins || 0;
+    losses = users[username].losses || 0;
+    showUserInfo();
+    updateScore();
+    updateRankDisplay();
+  }
+}
+
+function logout() {
+  currentUser = null;
+  showAuthForm();
+}
+
+function saveProgress() {
+  if (currentUser) {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    users[currentUser].rank = playerRank;
+    users[currentUser].wins = wins;
+    users[currentUser].losses = losses;
+    localStorage.setItem('users', JSON.stringify(users));
+  }
+}
+
+document.getElementById('registerBtn').addEventListener('click', register);
+document.getElementById('loginBtn').addEventListener('click', () => login(document.getElementById('username').value));
+document.getElementById('logoutBtn').addEventListener('click', logout);
+
+canvas.addEventListener('mousemove', handleMouseMove);
+canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+
 startButton.addEventListener('click', () => {
     if (currentUser) {
         if (!gameStarted) {
@@ -765,32 +799,6 @@ startButton.addEventListener('click', () => {
     }
 });
 
-function startFireworksShow() {
-    let fireworksCount = 0;
-    const fireworksInterval = setInterval(() => {
-        createFirework();
-        fireworksCount++;
-        if (fireworksCount >= 10) {  // Reduced number of fireworks
-            clearInterval(fireworksInterval);
-        }
-    }, 500);  // Increased interval between fireworks
-}
-
-function drawCountdown(text) {
-    ctx.fillStyle = 'rgba(51,0,0,0.7)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = `bold ${canvas.width * 0.18}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(51,0,0,0.5)';
-    ctx.fillText(text, canvas.width / 2 + 4, canvas.height / 2 + 4);
-    ctx.fillStyle = '#ff0000';  // Updated text color
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = '#ff0000';  // Updated shadow color
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-    ctx.shadowBlur = 0;
-}
-
 function draw(currentTime) {
     const deltaTime = currentTime - lastTime;
     if (deltaTime < targetFrameTime) {
@@ -798,6 +806,8 @@ function draw(currentTime) {
         return;
     }
     lastTime = currentTime - (deltaTime % targetFrameTime);
+
+    const now = Date.now(); 
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawTable();
@@ -809,8 +819,7 @@ function draw(currentTime) {
     drawFireworks();
     
     if (gameStarted && !isPaused) {
-        const now = Date.now();
-        const timeSinceScore = (now - lastScoreTime) * simulationSpeedMultiplier * gameSpeed;
+        const timeSinceScore = (now - lastScoreTime) * simulationSpeedMultiplier;
         
         if (timeSinceScore <= 3000) {
             if (timeSinceScore < 1000) {
@@ -832,61 +841,28 @@ function draw(currentTime) {
         if (timeSinceScore === 3500) {
             launchPuck();
         }
-        
-        if (goalEffect.active) {
-            const effectTime = (now - goalEffect.startTime) * simulationSpeedMultiplier * gameSpeed;
-            if (effectTime < 1000) {
-                ctx.font = `bold ${canvas.width * 0.06}px Arial`;
-                ctx.fillStyle = '#ff0000';  // Updated effect color
-                ctx.textAlign = 'center';
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#ff0000';  // Updated effect shadow color
-                ctx.fillText(goalEffect.scorer === 'Player' ? 'Player scored!' : 'AI scored!', canvas.width / 2, canvas.height / 2);
-                ctx.shadowBlur = 0;
-            } else {
-                goalEffect.active = false;
-            }
-        }
-        
-        if (isPuckStuck()) {
-            puckStuckTime += simulationSpeedMultiplier * gameSpeed;
-            if (puckStuckTime > 180) {  // 3 seconds (60 frames per second * 3)
-                resetPuck();
-                launchPuck();
-                puckStuckTime = 0;
-            }
+    }
+
+    if (goalEffect.active) {
+        const effectTime = (now - goalEffect.startTime) * simulationSpeedMultiplier;
+        if (effectTime < 1000) {
+            ctx.font = `bold ${canvas.width * 0.06}px Arial`;
+            ctx.fillStyle = '#00ff00';
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#006400';
+            ctx.fillText(goalEffect.scorer === 'Player' ? 'Player scored!' : 'AI scored!', canvas.width / 2, canvas.height / 2);
+            ctx.shadowBlur = 0;
         } else {
-            puckStuckTime = 0;
+            goalEffect.active = false;
         }
     }
-    
+
     updateScore();
     requestAnimationFrame(draw);
 }
 
-canvas.addEventListener('mousemove', handleMouseMove);
-canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
-
-soundToggle.addEventListener('click', () => {
-    soundOn = !soundOn;
-    soundToggle.textContent = soundOn ? '🔊 Sound On' : '🔇 Sound Off';
-});
-
-pauseButton.addEventListener('click', () => {
-    isPaused = !isPaused;
-    pauseButton.textContent = isPaused ? '▶️ Resume' : '⏸️ Pause';
-});
-
-speedSelector.addEventListener('change', (e) => {
-    if (e.target.type === 'radio') {
-        speed = e.target.value;
-        gameSpeed = 1;  // Set to normal speed
-    }
-});
-
-// Initial draw call
 requestAnimationFrame(draw);
-showAuthForm();
 </script>
 </body>
 </html>
